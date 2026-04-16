@@ -1,13 +1,19 @@
-import { PenSquare, Power } from 'lucide-react';
+import { EyeOff, PenSquare, Power, Trash2 } from 'lucide-react';
 import type { Category } from '../types/categories.types';
 
 interface Props {
   categories: Category[];
   onEdit: (category: Category) => void;
   onToggleStatus: (category: Category) => void;
+  onDelete: (category: Category) => void;
 }
 
-function CategoryTable({ categories, onEdit, onToggleStatus }: Props) {
+function CategoryTable({
+  categories,
+  onEdit,
+  onToggleStatus,
+  onDelete,
+}: Props) {
   if (categories.length === 0) {
     return (
       <div className="category-empty-state">
@@ -43,7 +49,7 @@ function CategoryTable({ categories, onEdit, onToggleStatus }: Props) {
                       : 'status-badge status-inactive'
                   }
                 >
-                  {category.isActive ? 'Activa' : 'Inactiva'}
+                  {category.isActive ? 'Activa' : 'Oculta'}
                 </span>
               </td>
               <td>
@@ -59,11 +65,20 @@ function CategoryTable({ categories, onEdit, onToggleStatus }: Props) {
 
                   <button
                     type="button"
-                    className={category.isActive ? 'button-danger' : 'button-primary'}
+                    className={category.isActive ? 'button-warning' : 'button-primary'}
                     onClick={() => onToggleStatus(category)}
                   >
-                    <Power size={16} />
-                    <span>{category.isActive ? 'Desactivar' : 'Activar'}</span>
+                    {category.isActive ? <EyeOff size={16} /> : <Power size={16} />}
+                    <span>{category.isActive ? 'Ocultar' : 'Mostrar'}</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    className="button-danger"
+                    onClick={() => onDelete(category)}
+                  >
+                    <Trash2 size={16} />
+                    <span>Eliminar</span>
                   </button>
                 </div>
               </td>

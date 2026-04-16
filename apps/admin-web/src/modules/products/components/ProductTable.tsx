@@ -1,9 +1,11 @@
+import { EyeOff, PenSquare, Power, Trash2 } from 'lucide-react';
 import type { Product } from '../types/products.types';
 
 interface Props {
   products: Product[];
   onEdit: (product: Product) => void;
   onToggleAvailability: (product: Product) => void;
+  onDelete: (product: Product) => void;
 }
 
 function resolveImageUrl(imageUrl: string | null) {
@@ -12,7 +14,12 @@ function resolveImageUrl(imageUrl: string | null) {
   return `http://localhost:5000${imageUrl}`;
 }
 
-function ProductTable({ products, onEdit, onToggleAvailability }: Props) {
+function ProductTable({
+  products,
+  onEdit,
+  onToggleAvailability,
+  onDelete,
+}: Props) {
   if (products.length === 0) {
     return (
       <div className="product-empty-state">
@@ -81,7 +88,7 @@ function ProductTable({ products, onEdit, onToggleAvailability }: Props) {
                         : 'status-badge status-inactive'
                     }
                   >
-                    {product.isAvailable ? 'Disponible' : 'No disponible'}
+                    {product.isAvailable ? 'Visible' : 'Oculto'}
                   </span>
                 </td>
 
@@ -92,15 +99,26 @@ function ProductTable({ products, onEdit, onToggleAvailability }: Props) {
                       className="button-secondary"
                       onClick={() => onEdit(product)}
                     >
-                      Editar
+                      <PenSquare size={16} />
+                      <span>Editar</span>
                     </button>
 
                     <button
                       type="button"
-                      className={product.isAvailable ? 'button-danger' : 'button-primary'}
+                      className={product.isAvailable ? 'button-warning' : 'button-primary'}
                       onClick={() => onToggleAvailability(product)}
                     >
-                      {product.isAvailable ? 'Desactivar' : 'Activar'}
+                      {product.isAvailable ? <EyeOff size={16} /> : <Power size={16} />}
+                      <span>{product.isAvailable ? 'Ocultar' : 'Mostrar'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      className="button-danger"
+                      onClick={() => onDelete(product)}
+                    >
+                      <Trash2 size={16} />
+                      <span>Eliminar</span>
                     </button>
                   </div>
                 </td>

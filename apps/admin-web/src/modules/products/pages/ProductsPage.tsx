@@ -1,7 +1,11 @@
+import { isAxiosError } from 'axios';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo, useState } from 'react';
+import ConfirmModal from '../../../components/ui/ConfirmModal';
 import PageHeader from '../../../components/ui/PageHeader';
+import Toast from '../../../components/ui/Toast';
 import '../../../components/ui/ui.css';
+import { useToast } from '../../../hooks/useToast';
 import { getCategories } from '../../categories/services/categories.service';
 import ProductFilters from '../components/ProductFilters';
 import ProductForm from '../components/ProductForm';
@@ -9,6 +13,7 @@ import ProductPaginationControls from '../components/ProductPaginationControls';
 import ProductTable from '../components/ProductTable';
 import {
   createProduct,
+  deleteProduct,
   getProducts,
   toggleProductAvailability,
   updateProduct,
@@ -18,6 +23,7 @@ import type { Product } from '../types/products.types';
 
 function ProductsPage() {
   const queryClient = useQueryClient();
+  const { toasts, showToast, removeToast } = useToast();
 
   const [search, setSearch] = useState('');
   const [categoryId, setCategoryId] = useState('');
@@ -26,13 +32,22 @@ function ProductsPage() {
   >('all');
   const [page, setPage] = useState(1);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [productToDelete, setProductToDelete] = useState<Product | null>(null);
 
   const parsedAvailability = useMemo(() => {
     if (availabilityFilter === 'available') return true;
     if (availabilityFilter === 'unavailable') return false;
     return undefined;
   }, [availabilityFilter]);
+
+  const refreshAll = () => {
+    queryClient.invalidateQueries({ queryKey: ['products'] });
+    queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] });
+    queryClient.invalidateQueries({ queryKey: ['dashboard-low-stock'] });
+    queryClient.invalidateQueries({ queryKey: ['dashboard-recent-orders'] });
+    queryClient.invalidateQueries({ queryKey: ['dashboard-top-products'] });
+  };
 
   const categoriesQuery = useQuery({
     queryKey: ['categories-for-products'],
@@ -59,15 +74,17 @@ function ProductsPage() {
   const createMutation = useMutation({
     mutationFn: createProduct,
     onSuccess: (response) => {
-      setFeedback({ type: 'success', text: response.message });
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      showToast('success', response.message);
+      refreshAll();
       setSelectedProduct(null);
     },
-    onError: (error: any) => {
-      setFeedback({
-        type: 'error',
-        text: error?.response?.data?.message || 'No se pudo crear el producto',
-      });
+    onError: (error: unknown) => {
+      showToast(
+        'error',
+        isAxiosError(error)
+          ? error.response?.data?.message || 'No se pudo crear el producto'
+          : 'No se pudo crear el producto'
+      );
     },
   });
 
@@ -86,72 +103,54 @@ function ProductsPage() {
       };
     }) => updateProduct(id, payload),
     onSuccess: (response) => {
-      setFeedback({ type: 'success', text: response.message });
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      showToast('success', response.message);
+      refreshAll();
       setSelectedProduct(null);
     },
-    onError: (error: any) => {
-      setFeedback({
-        type: 'error',
-        text: error?.response?.data?.message || 'No se pudo actualizar el producto',
-      });
+    onError: (error: unknown) => {
+      showToast(
+        'error',
+        isAxiosError(error)
+          ? error.response?.data?.message || 'No se pudo actualizar el producto'
+          : 'No se pudo actualizar el producto'
+      );
     },
   });
 
   const toggleMutation = useMutation({
     mutationFn: toggleProductAvailability,
     onSuccess: (response) => {
-      setFeedback({ type: 'success', text: response.message });
-      queryClient.invalidateQueries({ queryKey: ['products'] });
+      showToast('success', response.message);
+      refreshAll();
     },
-    onError: (error: any) => {
-      setFeedback({
-        type: 'error',
-        text: error?.response?.data?.message || 'No se pudo cambiar el estado',
-      });
+    onError: (error: unknown) => {
+      showToast(
+        'error',
+        isAxiosError(error)
+          ? error.response?.data?.message || 'No se pudo cambiar el estado'
+          : 'No se pudo cambiar el estado'
+      );
     },
   });
 
-  const handleSubmit = (values: {
-    name: string;
-    description: string;
-    price: number;
-    categoryId: number;
-    image: File | null;
-  }) => {
-    setFeedback(null);
-
-    if (selectedProduct) {
-      updateMutation.mutate({
-        id: selectedProduct.id,
-        payload: values,
-      });
-      return;
-    }
-
-    createMutation.mutate(values);
-  };
-
-  const handleEdit = (product: Product) => {
-    setSelectedProduct(product);
-    setFeedback(null);
-  };
-
-  const handleCancelEdit = () => {
-    setSelectedProduct(null);
-  };
-
-  const handleToggleAvailability = (product: Product) => {
-    setFeedback(null);
-    toggleMutation.mutate(product.id);
-  };
-
-  const handleResetFilters = () => {
-    setSearch('');
-    setCategoryId('');
-    setAvailabilityFilter('all');
-    setPage(1);
-  };
+  const deleteMutation = useMutation({
+    mutationFn: deleteProduct,
+    onSuccess: (response) => {
+      showToast('success', response.message);
+      refreshAll();
+      setProductToDelete(null);
+      if (selectedProduct) setSelectedProduct(null);
+    },
+    onError: (error: unknown) => {
+      showToast(
+        'error',
+        isAxiosError(error)
+          ? error.response?.data?.message || 'No se pudo eliminar el producto'
+          : 'No se pudo eliminar el producto'
+      );
+      setProductToDelete(null);
+    },
+  });
 
   const categories = categoriesQuery.data?.data ?? [];
   const products = productsQuery.data?.data ?? [];
@@ -164,16 +163,6 @@ function ProductsPage() {
         subtitle="Administra productos e imágenes del restaurante"
       />
 
-      {feedback && (
-        <div
-          className={`feedback-message ${
-            feedback.type === 'success' ? 'feedback-success' : 'feedback-error'
-          }`}
-        >
-          {feedback.text}
-        </div>
-      )}
-
       <div className="products-page-grid">
         <ProductForm
           categories={categories.map((category) => ({
@@ -182,8 +171,18 @@ function ProductsPage() {
           }))}
           initialData={selectedProduct}
           isLoading={createMutation.isPending || updateMutation.isPending}
-          onSubmit={handleSubmit}
-          onCancel={selectedProduct ? handleCancelEdit : undefined}
+          onSubmit={(values) => {
+            if (selectedProduct) {
+              updateMutation.mutate({
+                id: selectedProduct.id,
+                payload: values,
+              });
+              return;
+            }
+
+            createMutation.mutate(values);
+          }}
+          onCancel={selectedProduct ? () => setSelectedProduct(null) : undefined}
         />
 
         <div className="product-panel-card">
@@ -210,21 +209,25 @@ function ProductsPage() {
               setAvailabilityFilter(value as 'all' | 'available' | 'unavailable');
               setPage(1);
             }}
-            onReset={handleResetFilters}
+            onReset={() => {
+              setSearch('');
+              setCategoryId('');
+              setAvailabilityFilter('all');
+              setPage(1);
+            }}
           />
 
           {productsQuery.isLoading ? (
             <div className="product-empty-state">Cargando productos...</div>
           ) : productsQuery.isError ? (
-            <div className="product-empty-state">
-              No se pudieron cargar los productos.
-            </div>
+            <div className="product-empty-state">No se pudieron cargar los productos.</div>
           ) : (
             <>
               <ProductTable
                 products={products}
-                onEdit={handleEdit}
-                onToggleAvailability={handleToggleAvailability}
+                onEdit={(product) => setSelectedProduct(product)}
+                onToggleAvailability={(product) => toggleMutation.mutate(product.id)}
+                onDelete={(product) => setProductToDelete(product)}
               />
 
               {pagination && (
@@ -240,6 +243,33 @@ function ProductsPage() {
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={Boolean(productToDelete)}
+        title="Eliminar producto"
+        message={
+          productToDelete
+            ? `¿Seguro que deseas eliminar el producto "${productToDelete.name}"? Si tiene inventario, movimientos o pedidos relacionados, el sistema no permitirá borrarlo.`
+            : ''
+        }
+        confirmText="Sí, eliminar"
+        secondaryText="Mejor ocultar"
+        cancelText="Cancelar"
+        isDanger
+        isLoading={deleteMutation.isPending || toggleMutation.isPending}
+        onCancel={() => setProductToDelete(null)}
+        onConfirm={() => {
+          if (productToDelete) deleteMutation.mutate(productToDelete.id);
+        }}
+        onSecondaryAction={() => {
+          if (productToDelete) {
+            toggleMutation.mutate(productToDelete.id);
+            setProductToDelete(null);
+          }
+        }}
+      />
+
+      <Toast toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

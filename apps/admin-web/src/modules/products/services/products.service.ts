@@ -93,3 +93,8 @@ export async function toggleProductAvailability(id: number) {
 
   return data;
 }
+
+export async function deleteProduct(id: number) {
+  const { data } = await api.delete<ProductMutationResponse>(`/products/${id}`);
+  return data;
+}

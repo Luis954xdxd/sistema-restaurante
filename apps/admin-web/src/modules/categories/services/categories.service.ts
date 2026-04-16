@@ -49,3 +49,8 @@ export async function toggleCategoryStatus(id: number) {
   );
   return data;
 }
+
+export async function deleteCategory(id: number) {
+  const { data } = await api.delete<CategoryMutationResponse>(`/categories/${id}`);
+  return data;
+}
