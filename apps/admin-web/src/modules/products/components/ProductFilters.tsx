@@ -6,7 +6,7 @@ interface CategoryOption {
 interface Props {
   search: string;
   categoryId: string;
-  availabilityFilter: string;
+  availabilityFilter: 'all' | 'available' | 'unavailable';
   categories: CategoryOption[];
   onSearchChange: (value: string) => void;
   onCategoryChange: (value: string) => void;
@@ -27,9 +27,9 @@ function ProductFilters({
   return (
     <div className="product-filters">
       <div className="product-filter-group">
-        <label htmlFor="search-product">Buscar</label>
+        <label htmlFor="product-search">Buscar</label>
         <input
-          id="search-product"
+          id="product-search"
           type="text"
           value={search}
           onChange={(e) => onSearchChange(e.target.value)}
@@ -38,15 +38,15 @@ function ProductFilters({
       </div>
 
       <div className="product-filter-group">
-        <label htmlFor="category-product">Categoría</label>
+        <label htmlFor="product-category-filter">Categoría</label>
         <select
-          id="category-product"
+          id="product-category-filter"
           value={categoryId}
           onChange={(e) => onCategoryChange(e.target.value)}
         >
           <option value="">Todas</option>
           {categories.map((category) => (
-            <option key={category.id} value={String(category.id)}>
+            <option key={category.id} value={category.id}>
               {category.name}
             </option>
           ))}
@@ -54,20 +54,24 @@ function ProductFilters({
       </div>
 
       <div className="product-filter-group">
-        <label htmlFor="availability-product">Disponibilidad</label>
+        <label htmlFor="product-availability-filter">Disponibilidad</label>
         <select
-          id="availability-product"
+          id="product-availability-filter"
           value={availabilityFilter}
           onChange={(e) => onAvailabilityChange(e.target.value)}
         >
           <option value="all">Todos</option>
           <option value="available">Disponibles</option>
-          <option value="unavailable">No disponibles</option>
+          <option value="unavailable">Ocultos</option>
         </select>
       </div>
 
       <div className="product-filter-actions">
-        <button type="button" className="button-secondary" onClick={onReset}>
+        <button
+          type="button"
+          className="button-secondary"
+          onClick={onReset}
+        >
           Limpiar filtros
         </button>
       </div>

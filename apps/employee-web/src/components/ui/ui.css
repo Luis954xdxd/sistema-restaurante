@@ -1,0 +1,43 @@
+.employee-page-header {
+  margin-bottom: 26px;
+}
+
+.employee-page-header h1 {
+  margin: 0 0 8px;
+  font-size: 50px;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  font-weight: 900;
+  color: #081225;
+}
+
+.employee-page-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.employee-stat-card {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(16px);
+}
+
+.employee-stat-card-label {
+  display: block;
+  color: #64748b;
+  margin-bottom: 12px;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.employee-stat-card-value {
+  font-size: 42px;
+  font-weight: 900;
+  color: #0f172a;
+  letter-spacing: -0.05em;
+}

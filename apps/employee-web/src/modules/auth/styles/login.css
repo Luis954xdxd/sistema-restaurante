@@ -1,0 +1,120 @@
+.employee-login-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: center;
+  gap: 34px;
+  padding: 40px;
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.15), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.12), transparent 24%),
+    linear-gradient(135deg, #eff6ff 0%, #f8fbff 40%, #eef5ff 100%);
+}
+
+.employee-login-hero {
+  padding: 12px 12px 12px 24px;
+}
+
+.employee-login-badge {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+  font-weight: 800;
+  margin-bottom: 18px;
+}
+
+.employee-login-hero h1 {
+  margin: 0;
+  font-size: 54px;
+  line-height: 0.98;
+  letter-spacing: -0.06em;
+  font-weight: 900;
+  color: #081225;
+  max-width: 720px;
+}
+
+.employee-login-hero p {
+  margin: 18px 0 0;
+  max-width: 660px;
+  color: #52627a;
+  font-size: 20px;
+  line-height: 1.5;
+}
+
+.employee-login-card {
+  width: 100%;
+  max-width: 520px;
+  justify-self: center;
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(255, 255, 255, 0.96);
+  border-radius: 28px;
+  padding: 32px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
+  backdrop-filter: blur(18px);
+}
+
+.employee-login-card h1 {
+  margin: 0 0 8px;
+  font-size: 38px;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+}
+
+.employee-login-card p {
+  margin: 0 0 24px;
+  color: #5f6b7a;
+  font-size: 17px;
+}
+
+.employee-login-form {
+  display: grid;
+  gap: 18px;
+}
+
+.employee-login-form label {
+  display: grid;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.employee-login-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+  border: 1px solid #d7deea;
+  border-radius: 16px;
+  background: #fff;
+}
+
+.employee-login-input-wrap input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 14px 0;
+  font-size: 15px;
+}
+
+.employee-login-form button {
+  border: none;
+  border-radius: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.employee-login-error {
+  background: #ffe3e3;
+  color: #b42318;
+  border-radius: 14px;
+  padding: 12px;
+  font-weight: 700;
+}

@@ -1,3 +1,4 @@
+// Props de la paginación
 interface Props {
   page: number;
   totalPages: number;
@@ -6,7 +7,8 @@ interface Props {
   onChangePage: (page: number) => void;
 }
 
-function ProductPaginationControls({
+// Controles de paginación
+function OrderPaginationControls({
   page,
   totalPages,
   hasNextPage,
@@ -14,23 +16,23 @@ function ProductPaginationControls({
   onChangePage,
 }: Props) {
   return (
-    <div className="pagination-controls">
+    <div className="pagination-container">
       <button
         type="button"
-        className="button-secondary"
+        className="button button-secondary"
         disabled={!hasPreviousPage}
         onClick={() => onChangePage(page - 1)}
       >
         ← Anterior
       </button>
 
-      <span>
+      <span className="pagination-text">
         Página {page} de {totalPages}
       </span>
 
       <button
         type="button"
-        className="button-primary"
+        className="button button-primary"
         disabled={!hasNextPage}
         onClick={() => onChangePage(page + 1)}
       >
@@ -40,4 +42,4 @@ function ProductPaginationControls({
   );
 }
 
-export default ProductPaginationControls;
+export default OrderPaginationControls;

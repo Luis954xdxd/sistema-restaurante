@@ -1,0 +1,261 @@
+.employee-orders-page-grid {
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.employee-order-form-card,
+.employee-order-panel-card {
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  border-radius: 24px;
+  padding: 22px;
+  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(16px);
+  min-width: 0;
+}
+
+.employee-order-form-header h3,
+.employee-order-panel-card h3 {
+  margin: 0 0 6px;
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.employee-order-form-header p,
+.employee-order-panel-card p {
+  margin: 0;
+  color: #64748b;
+}
+
+.employee-order-form-group {
+  display: grid;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.employee-order-form-group label,
+.employee-order-filter-group label {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.employee-order-form-group select,
+.employee-order-filter-group input,
+.employee-order-filter-group select {
+  width: 100%;
+  border: 1px solid #dbe4f0;
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: #fff;
+  outline: none;
+}
+
+.employee-order-form-actions,
+.employee-order-filter-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.employee-order-form-actions {
+  margin-top: 20px;
+}
+
+.employee-order-summary-box {
+  margin-top: 18px;
+  padding: 16px;
+  border-radius: 18px;
+  background: #f8fafc;
+  display: grid;
+  gap: 8px;
+}
+
+.employee-order-filters {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(170px, 1fr));
+  gap: 14px;
+  align-items: end;
+  margin-top: 18px;
+  margin-bottom: 20px;
+}
+
+.employee-order-filter-group {
+  display: grid;
+  gap: 8px;
+}
+
+.employee-order-filter-actions {
+  grid-column: 1 / -1;
+  justify-content: flex-end;
+}
+
+.employee-order-table-wrapper {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  border-radius: 18px;
+  background: white;
+  border: 1px solid #dbe4f0;
+}
+
+.employee-order-table {
+  width: 100%;
+  min-width: 1180px;
+  border-collapse: collapse;
+}
+
+.employee-order-table th,
+.employee-order-table td {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid #eef2f7;
+  vertical-align: middle;
+}
+
+.employee-order-table th {
+  background: #f8fafc;
+  font-size: 14px;
+  color: #475569;
+  font-weight: 800;
+}
+
+.employee-order-empty-state {
+  padding: 24px;
+  border-radius: 18px;
+  background: white;
+  border: 1px dashed #cbd5e1;
+  color: #64748b;
+  text-align: center;
+}
+
+.employee-order-items-preview {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: #334155;
+}
+
+.employee-order-status-badge {
+  display: inline-flex;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.employee-order-status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.employee-order-status-in_preparation {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.employee-order-status-ready {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.employee-order-status-delivered {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.employee-order-status-cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.employee-pagination-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 18px;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 1200px) {
+  .employee-orders-page-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .employee-order-filters {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* =========================
+   BOTONES GENERALES
+========================= */
+
+.button {
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.button-primary {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+}
+
+.button-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.28);
+}
+
+.button-secondary {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.button-secondary:hover {
+  background: #d1d5db;
+  transform: translateY(-1px);
+}
+
+.button-ghost {
+  background: white;
+  border: 1px solid #d1d5db;
+  color: #374151;
+}
+
+.button-ghost:hover {
+  background: #f3f4f6;
+  transform: translateY(-1px);
+}
+
+.button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* =========================
+   PAGINACIÓN
+========================= */
+
+.pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pagination-text {
+  font-size: 14px;
+  color: #6b7280;
+  font-weight: 600;
+}
