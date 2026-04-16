@@ -1,50 +1,28 @@
 import prisma from '../../config/prisma';
-import { CreateProductInput, UpdateProductInput } from './product.types';
-import { buildPaginatedResponse, getPaginationParams } from '../../utils/pagination';
-import { GetProductsQuery } from './product.types';
 import { AppError } from '../../shared/errors/AppError';
+import { buildPaginationMeta, getPaginationParams, getSkip } from '../../utils/pagination';
+import type {
+  CreateProductInput,
+  GetProductsQuery,
+  UpdateProductInput,
+} from './product.types';
 
-export const createProductService = async (input: CreateProductInput) => {
-  const { name, description, price, imageUrl, categoryId } = input;
-
-  const normalizedName = name.trim();
-
-  if (!normalizedName) {
-    throw new AppError('El nombre del producto es obligatorio', 400);
-  }
-
-  if (typeof price !== 'number' || Number.isNaN(price) || price <= 0) {
-    throw new AppError('El precio debe ser un número mayor a 0', 400);
-  }
-
-  if (!Number.isInteger(categoryId) || categoryId <= 0) {
-    throw new AppError('El categoryId debe ser un número entero válido', 400);
-  }
-
-  const existingCategory = await prisma.category.findUnique({
-    where: {
-      id: categoryId,
-    },
+export async function createProductService(payload: CreateProductInput) {
+  const category = await prisma.category.findUnique({
+    where: { id: payload.categoryId },
   });
 
-  if (!existingCategory) {
+  if (!category) {
     throw new AppError('La categoría seleccionada no existe', 404);
-  }
-
-  if (!existingCategory.isActive) {
-    throw new AppError(
-      'No se puede crear un producto en una categoría inactiva',
-      400
-    );
   }
 
   const product = await prisma.product.create({
     data: {
-      name: normalizedName,
-      description: description?.trim() || null,
-      price,
-      imageUrl: imageUrl?.trim() || null,
-      categoryId,
+      name: payload.name,
+      description: payload.description,
+      price: payload.price,
+      imageUrl: payload.imageUrl,
+      categoryId: payload.categoryId,
     },
     include: {
       category: true,
@@ -55,39 +33,31 @@ export const createProductService = async (input: CreateProductInput) => {
     message: 'Producto creado correctamente',
     product,
   };
-};
+}
 
-export const getAllProductsService = async (query: GetProductsQuery) => {
-  const { search, categoryId, isAvailable, page, limit } = query;
+export async function getAllProductsService(query: GetProductsQuery) {
+  const { page, limit } = getPaginationParams(query.page, query.limit);
 
-  const { page: currentPage, limit: currentLimit, skip } = getPaginationParams(
-    page,
-    limit
-  );
-
-  const where: {
-    name?: {
-      contains: string;
-      mode: 'insensitive';
-    };
-    categoryId?: number;
-    isAvailable?: boolean;
-  } = {};
-
-  if (search) {
-    where.name = {
-      contains: search.trim(),
-      mode: 'insensitive',
-    };
-  }
-
-  if (typeof categoryId === 'number' && !Number.isNaN(categoryId)) {
-    where.categoryId = categoryId;
-  }
-
-  if (typeof isAvailable === 'boolean') {
-    where.isAvailable = isAvailable;
-  }
+  const where = {
+    ...(query.search
+      ? {
+          name: {
+            contains: query.search,
+            mode: 'insensitive' as const,
+          },
+        }
+      : {}),
+    ...(typeof query.categoryId === 'number'
+      ? {
+          categoryId: query.categoryId,
+        }
+      : {}),
+    ...(typeof query.isAvailable === 'boolean'
+      ? {
+          isAvailable: query.isAvailable,
+        }
+      : {}),
+  };
 
   const [products, totalItems] = await Promise.all([
     prisma.product.findMany({
@@ -96,122 +66,67 @@ export const getAllProductsService = async (query: GetProductsQuery) => {
         category: true,
       },
       orderBy: {
-        id: 'asc',
+        createdAt: 'desc',
       },
-      skip,
-      take: currentLimit,
+      skip: getSkip(page, limit),
+      take: limit,
     }),
     prisma.product.count({ where }),
   ]);
 
   return {
     message: 'Productos obtenidos correctamente',
-    ...buildPaginatedResponse(products, currentPage, currentLimit, totalItems),
+    data: products,
+    pagination: buildPaginationMeta(totalItems, page, limit),
   };
-};
+}
 
-export const getProductByIdService = async (id: number) => {
+export async function getProductByIdService(id: number) {
   const product = await prisma.product.findUnique({
-    where: {
-      id,
-    },
+    where: { id },
     include: {
       category: true,
     },
   });
 
   if (!product) {
-    throw new Error('Producto no encontrado');
+    throw new AppError('Producto no encontrado', 404);
   }
 
   return {
     message: 'Producto obtenido correctamente',
     product,
   };
-};
+}
 
-export const updateProductService = async (
-  id: number,
-  input: UpdateProductInput
-) => {
+export async function updateProductService(id: number, payload: UpdateProductInput) {
   const existingProduct = await prisma.product.findUnique({
-    where: {
-      id,
-    },
+    where: { id },
   });
 
   if (!existingProduct) {
     throw new AppError('Producto no encontrado', 404);
   }
 
-  const dataToUpdate: {
-    name?: string;
-    description?: string | null;
-    price?: number;
-    imageUrl?: string | null;
-    categoryId?: number;
-  } = {};
-
-  if (input.name !== undefined) {
-    const normalizedName = input.name.trim();
-
-    if (!normalizedName) {
-      throw new AppError('El nombre del producto no puede estar vacío', 400);
-    }
-
-    dataToUpdate.name = normalizedName;
-  }
-
-  if (input.description !== undefined) {
-    dataToUpdate.description = input.description.trim() || null;
-  }
-
-  if (input.price !== undefined) {
-    if (
-      typeof input.price !== 'number' ||
-      Number.isNaN(input.price) ||
-      input.price <= 0
-    ) {
-      throw new AppError('El precio debe ser un número mayor a 0', 400);
-    }
-
-    dataToUpdate.price = input.price;
-  }
-
-  if (input.imageUrl !== undefined) {
-    dataToUpdate.imageUrl = input.imageUrl.trim() || null;
-  }
-
-  if (input.categoryId !== undefined) {
-    if (!Number.isInteger(input.categoryId) || input.categoryId <= 0) {
-      throw new AppError('El categoryId debe ser un número entero válido', 400);
-    }
-
-    const existingCategory = await prisma.category.findUnique({
-      where: {
-        id: input.categoryId,
-      },
+  if (payload.categoryId) {
+    const category = await prisma.category.findUnique({
+      where: { id: payload.categoryId },
     });
 
-    if (!existingCategory) {
+    if (!category) {
       throw new AppError('La categoría seleccionada no existe', 404);
     }
-
-    if (!existingCategory.isActive) {
-      throw new AppError(
-        'No se puede mover un producto a una categoría inactiva',
-        400
-      );
-    }
-
-    dataToUpdate.categoryId = input.categoryId;
   }
 
   const updatedProduct = await prisma.product.update({
-    where: {
-      id,
+    where: { id },
+    data: {
+      name: payload.name,
+      description: payload.description,
+      price: payload.price,
+      imageUrl: payload.imageUrl,
+      categoryId: payload.categoryId,
     },
-    data: dataToUpdate,
     include: {
       category: true,
     },
@@ -221,22 +136,19 @@ export const updateProductService = async (
     message: 'Producto actualizado correctamente',
     product: updatedProduct,
   };
-};
-export const toggleProductAvailabilityService = async (id: number) => {
+}
+
+export async function toggleProductAvailabilityService(id: number) {
   const existingProduct = await prisma.product.findUnique({
-    where: {
-      id,
-    },
+    where: { id },
   });
 
   if (!existingProduct) {
-    throw new Error('Producto no encontrado');
+    throw new AppError('Producto no encontrado', 404);
   }
 
   const updatedProduct = await prisma.product.update({
-    where: {
-      id,
-    },
+    where: { id },
     data: {
       isAvailable: !existingProduct.isAvailable,
     },
@@ -247,8 +159,51 @@ export const toggleProductAvailabilityService = async (id: number) => {
 
   return {
     message: updatedProduct.isAvailable
-      ? 'Producto activado correctamente'
-      : 'Producto desactivado correctamente',
+      ? 'Producto visible correctamente'
+      : 'Producto oculto correctamente',
     product: updatedProduct,
   };
-};
+}
+
+export async function deleteProductService(id: number) {
+  const existingProduct = await prisma.product.findUnique({
+    where: { id },
+    include: {
+      inventory: true,
+      inventoryMovements: {
+        select: { id: true },
+      },
+      orderItems: {
+        select: { id: true },
+      },
+    },
+  });
+
+  if (!existingProduct) {
+    throw new AppError('Producto no encontrado', 404);
+  }
+
+  const hasRelations =
+    existingProduct.inventory !== null ||
+    existingProduct.inventoryMovements.length > 0 ||
+    existingProduct.orderItems.length > 0;
+
+  if (hasRelations) {
+    throw new AppError(
+      'No se puede eliminar el producto porque tiene inventario, movimientos o pedidos relacionados. Puedes ocultarlo.',
+      409
+    );
+  }
+
+  const deletedProduct = await prisma.product.delete({
+    where: { id },
+    include: {
+      category: true,
+    },
+  });
+
+  return {
+    message: 'Producto eliminado correctamente',
+    product: deletedProduct,
+  };
+}

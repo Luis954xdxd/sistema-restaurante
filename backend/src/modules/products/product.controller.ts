@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import {
   createProductService,
+  deleteProductService,
   getAllProductsService,
   getProductByIdService,
   toggleProductAvailabilityService,
@@ -84,12 +85,12 @@ export const getProductByIdController = async (req: Request, res: Response) => {
 
     const result = await getProductByIdService(id);
 
-    res.status(200).json(result);
+    return res.status(200).json(result);
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Error interno del servidor';
 
-    res.status(404).json({
+    return res.status(404).json({
       message: errorMessage,
     });
   }
@@ -117,12 +118,12 @@ export const updateProductController = async (req: Request, res: Response) => {
 
     const result = await updateProductService(id, payload);
 
-    res.status(200).json(result);
+    return res.status(200).json(result);
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Error interno del servidor';
 
-    res.status(400).json({
+    return res.status(400).json({
       message: errorMessage,
     });
   }
@@ -143,12 +144,35 @@ export const toggleProductAvailabilityController = async (
 
     const result = await toggleProductAvailabilityService(id);
 
-    res.status(200).json(result);
+    return res.status(200).json(result);
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Error interno del servidor';
 
-    res.status(404).json({
+    return res.status(404).json({
+      message: errorMessage,
+    });
+  }
+};
+
+export const deleteProductController = async (req: Request, res: Response) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (Number.isNaN(id)) {
+      return res.status(400).json({
+        message: 'El id debe ser un número válido',
+      });
+    }
+
+    const result = await deleteProductService(id);
+
+    return res.status(200).json(result);
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Error interno del servidor';
+
+    return res.status(409).json({
       message: errorMessage,
     });
   }

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   createCategoryController,
+  deleteCategoryController,
   getAllCategoriesController,
   getCategoryByIdController,
   toggleCategoryStatusController,
@@ -11,8 +12,19 @@ import { authorizeRoles } from '../../middlewares/role.middleware';
 
 const router = Router();
 
-router.get('/', authenticate, getAllCategoriesController);
-router.get('/:id', authenticate, getCategoryByIdController);
+router.get(
+  '/',
+  authenticate,
+  authorizeRoles('ADMIN', 'EMPLOYEE'),
+  getAllCategoriesController
+);
+
+router.get(
+  '/:id',
+  authenticate,
+  authorizeRoles('ADMIN', 'EMPLOYEE'),
+  getCategoryByIdController
+);
 
 router.post(
   '/',
@@ -33,6 +45,13 @@ router.patch(
   authenticate,
   authorizeRoles('ADMIN'),
   toggleCategoryStatusController
+);
+
+router.delete(
+  '/:id',
+  authenticate,
+  authorizeRoles('ADMIN'),
+  deleteCategoryController
 );
 
 export default router;

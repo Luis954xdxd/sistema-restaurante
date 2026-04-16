@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   createProductController,
+  deleteProductController,
   getAllProductsController,
   getProductByIdController,
   toggleProductAvailabilityController,
@@ -12,8 +13,19 @@ import { uploadProductImage } from '../../middlewares/upload.middleware';
 
 const router = Router();
 
-router.get('/', authenticate, getAllProductsController);
-router.get('/:id', authenticate, getProductByIdController);
+router.get(
+  '/',
+  authenticate,
+  authorizeRoles('ADMIN', 'EMPLOYEE'),
+  getAllProductsController
+);
+
+router.get(
+  '/:id',
+  authenticate,
+  authorizeRoles('ADMIN', 'EMPLOYEE'),
+  getProductByIdController
+);
 
 router.post(
   '/',
@@ -36,6 +48,13 @@ router.patch(
   authenticate,
   authorizeRoles('ADMIN'),
   toggleProductAvailabilityController
+);
+
+router.delete(
+  '/:id',
+  authenticate,
+  authorizeRoles('ADMIN'),
+  deleteProductController
 );
 
 export default router;

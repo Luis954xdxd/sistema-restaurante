@@ -1,76 +1,99 @@
 import { Request, Response } from 'express';
-import { asyncHandler } from '../../utils/asyncHandler';
 import {
   createCategoryService,
+  deleteCategoryService,
   getAllCategoriesService,
   getCategoryByIdService,
   toggleCategoryStatusService,
   updateCategoryService,
 } from './category.service';
-import { AppError } from '../../shared/errors/AppError';
 
-export const createCategoryController = asyncHandler(async (req: Request, res: Response) => {
-  const result = await createCategoryService(req.body);
+export async function createCategoryController(req: Request, res: Response) {
+  try {
+    const result = await createCategoryService(req.body);
 
-  res.status(201).json(result);
-});
+    return res.status(201).json(result);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Error interno del servidor';
 
-export const getAllCategoriesController = asyncHandler(async (req: Request, res: Response) => {
-  const search = req.query.search as string | undefined;
-  const isActiveParam = req.query.isActive as string | undefined;
-  const page = req.query.page ? Number(req.query.page) : undefined;
-  const limit = req.query.limit ? Number(req.query.limit) : undefined;
-
-  let isActive: boolean | undefined;
-
-  if (isActiveParam === 'true') {
-    isActive = true;
-  } else if (isActiveParam === 'false') {
-    isActive = false;
+    return res.status(400).json({ message });
   }
+}
 
-  const result = await getAllCategoriesService({
-    search,
-    isActive,
-    page,
-    limit,
-  });
+export async function getAllCategoriesController(req: Request, res: Response) {
+  try {
+    const result = await getAllCategoriesService({
+      search: req.query.search as string | undefined,
+      isActive:
+        req.query.isActive !== undefined
+          ? req.query.isActive === 'true'
+          : undefined,
+      page: req.query.page ? Number(req.query.page) : undefined,
+      limit: req.query.limit ? Number(req.query.limit) : undefined,
+    });
 
-  res.status(200).json(result);
-});
+    return res.status(200).json(result);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Error interno del servidor';
 
-export const getCategoryByIdController = asyncHandler(async (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-
-  if (Number.isNaN(id)) {
-    throw new AppError('El id debe ser un número válido', 400);
+    return res.status(500).json({ message });
   }
+}
 
-  const result = await getCategoryByIdService(id);
+export async function getCategoryByIdController(req: Request, res: Response) {
+  try {
+    const id = Number(req.params.id);
+    const result = await getCategoryByIdService(id);
 
-  res.status(200).json(result);
-});
+    return res.status(200).json(result);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Error interno del servidor';
 
-export const updateCategoryController = asyncHandler(async (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-
-  if (Number.isNaN(id)) {
-    throw new AppError('El id debe ser un número válido', 400);
+    return res.status(404).json({ message });
   }
+}
 
-  const result = await updateCategoryService(id, req.body);
+export async function updateCategoryController(req: Request, res: Response) {
+  try {
+    const id = Number(req.params.id);
+    const result = await updateCategoryService(id, req.body);
 
-  res.status(200).json(result);
-});
+    return res.status(200).json(result);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Error interno del servidor';
 
-export const toggleCategoryStatusController = asyncHandler(async (req: Request, res: Response) => {
-  const id = Number(req.params.id);
-
-  if (Number.isNaN(id)) {
-    throw new AppError('El id debe ser un número válido', 400);
+    return res.status(400).json({ message });
   }
+}
 
-  const result = await toggleCategoryStatusService(id);
+export async function toggleCategoryStatusController(req: Request, res: Response) {
+  try {
+    const id = Number(req.params.id);
+    const result = await toggleCategoryStatusService(id);
 
-  res.status(200).json(result);
-});
+    return res.status(200).json(result);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Error interno del servidor';
+
+    return res.status(404).json({ message });
+  }
+}
+
+export async function deleteCategoryController(req: Request, res: Response) {
+  try {
+    const id = Number(req.params.id);
+    const result = await deleteCategoryService(id);
+
+    return res.status(200).json(result);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'Error interno del servidor';
+
+    return res.status(409).json({ message });
+  }
+}
