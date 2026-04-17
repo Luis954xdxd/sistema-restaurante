@@ -81,6 +81,49 @@ export async function getAllProductsService(query: GetProductsQuery) {
   };
 }
 
+/**
+ * Obtiene productos públicos del menú:
+ * - solo productos disponibles
+ * - solo categorías activas
+ * - sin autenticación
+ */
+export async function getPublicProductsService() {
+  const products = await prisma.product.findMany({
+    where: {
+      isAvailable: true,
+      category: {
+        isActive: true,
+      },
+    },
+    include: {
+      category: true,
+    },
+    orderBy: [
+      {
+        category: {
+          name: 'asc',
+        },
+      },
+      {
+        name: 'asc',
+      },
+    ],
+  });
+
+  return {
+    message: 'Menú público obtenido correctamente',
+    data: products,
+    pagination: {
+      page: 1,
+      limit: products.length,
+      totalItems: products.length,
+      totalPages: 1,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    },
+  };
+}
+
 export async function getProductByIdService(id: number) {
   const product = await prisma.product.findUnique({
     where: { id },

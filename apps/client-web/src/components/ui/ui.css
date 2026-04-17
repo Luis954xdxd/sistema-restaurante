@@ -1,0 +1,58 @@
+.client-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  padding: 22px;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.84);
+  border: 1px solid rgba(255, 255, 255, 0.92);
+  box-shadow: 0 16px 34px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(14px);
+}
+
+.client-header h1 {
+  margin: 0 0 8px;
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: -0.05em;
+  font-weight: 900;
+  color: #081225;
+}
+
+.client-header p {
+  margin: 0;
+  color: #64748b;
+}
+
+.client-cart-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: none;
+  border-radius: 16px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.client-empty-state {
+  padding: 28px;
+  border-radius: 22px;
+  background: white;
+  border: 1px dashed #cbd5e1;
+  text-align: center;
+}
+
+.client-empty-state h3 {
+  margin: 0 0 8px;
+  font-size: 22px;
+}
+
+.client-empty-state p {
+  margin: 0;
+  color: #64748b;
+}

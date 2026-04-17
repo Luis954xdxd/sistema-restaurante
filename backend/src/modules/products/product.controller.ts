@@ -4,6 +4,7 @@ import {
   deleteProductService,
   getAllProductsService,
   getProductByIdService,
+  getPublicProductsService,
   toggleProductAvailabilityService,
   updateProductService,
 } from './product.service';
@@ -68,6 +69,24 @@ export const getAllProductsController = async (req: Request, res: Response) => {
       error instanceof Error ? error.message : 'Error interno del servidor';
 
     res.status(500).json({
+      message: errorMessage,
+    });
+  }
+};
+
+export const getPublicProductsController = async (
+  _req: Request,
+  res: Response
+) => {
+  try {
+    const result = await getPublicProductsService();
+
+    return res.status(200).json(result);
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Error interno del servidor';
+
+    return res.status(500).json({
       message: errorMessage,
     });
   }

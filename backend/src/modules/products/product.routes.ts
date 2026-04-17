@@ -4,6 +4,7 @@ import {
   deleteProductController,
   getAllProductsController,
   getProductByIdController,
+  getPublicProductsController,
   toggleProductAvailabilityController,
   updateProductController,
 } from './product.controller';
@@ -12,6 +13,12 @@ import { authorizeRoles } from '../../middlewares/role.middleware';
 import { uploadProductImage } from '../../middlewares/upload.middleware';
 
 const router = Router();
+
+/**
+ * Ruta pública del menú para clientes
+ * No requiere autenticación
+ */
+router.get('/public', getPublicProductsController);
 
 router.get(
   '/',

@@ -1,0 +1,138 @@
+.client-cart-drawer {
+  position: fixed;
+  top: 0;
+  right: -420px;
+  width: 100%;
+  max-width: 420px;
+  height: 100vh;
+  background: rgba(255, 255, 255, 0.96);
+  border-left: 1px solid rgba(255, 255, 255, 0.98);
+  box-shadow: -20px 0 40px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(18px);
+  transition: right 0.28s ease;
+  z-index: 90;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.client-cart-drawer.open {
+  right: 0;
+}
+
+.client-cart-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: start;
+  padding: 22px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.client-cart-header h3 {
+  margin: 0 0 6px;
+  font-size: 26px;
+  font-weight: 900;
+}
+
+.client-cart-header p {
+  margin: 0;
+  color: #64748b;
+}
+
+.client-cart-header button {
+  border: none;
+  background: #f1f5f9;
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.client-cart-body {
+  padding: 18px;
+  overflow-y: auto;
+  display: grid;
+  gap: 14px;
+}
+
+.client-cart-empty {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  color: #64748b;
+  text-align: center;
+  height: 100%;
+}
+
+.client-cart-item-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: white;
+}
+
+.client-cart-item-card h4 {
+  margin: 0 0 8px;
+  font-size: 17px;
+}
+
+.client-cart-item-card p {
+  margin: 0;
+  color: #64748b;
+}
+
+.client-cart-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.client-cart-item-actions button {
+  border: none;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  cursor: pointer;
+}
+
+.client-cart-footer {
+  padding: 18px;
+  border-top: 1px solid #e2e8f0;
+  display: grid;
+  gap: 12px;
+}
+
+.client-cart-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.client-cart-total strong {
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.client-cart-clear-button,
+.client-cart-submit-button {
+  border: none;
+  border-radius: 14px;
+  padding: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.client-cart-clear-button {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.client-cart-submit-button {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+}
