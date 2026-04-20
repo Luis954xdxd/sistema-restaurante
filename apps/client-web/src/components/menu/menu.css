@@ -111,3 +111,49 @@
   font-weight: 800;
   cursor: pointer;
 }
+
+
+.client-product-stock-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.86);
+  color: white;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.client-product-stock-badge.out {
+  background: rgba(220, 38, 38, 0.92);
+}
+
+.client-product-image-wrap {
+  position: relative;
+  height: 210px;
+  background: #f8fafc;
+}
+
+.client-add-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: none;
+  border-radius: 14px;
+  padding: 11px 14px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.client-add-button.disabled,
+.client-add-button:disabled {
+  background: #cbd5e1;
+  color: #64748b;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}

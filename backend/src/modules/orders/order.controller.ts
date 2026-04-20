@@ -1,12 +1,16 @@
 import { Request, Response } from 'express';
 import {
   createOrderService,
+  createPublicOrderService,
   getAllOrdersService,
   getOrderByIdService,
   getOrdersByUserIdService,
   updateOrderStatusService,
 } from './order.service';
 
+// ==============================
+// CREAR PEDIDO INTERNO
+// ==============================
 export const createOrderController = async (req: Request, res: Response) => {
   try {
     const result = await createOrderService(req.body);
@@ -22,6 +26,9 @@ export const createOrderController = async (req: Request, res: Response) => {
   }
 };
 
+// ==============================
+// OBTENER TODOS LOS PEDIDOS
+// ==============================
 export const getAllOrdersController = async (req: Request, res: Response) => {
   try {
     const status = req.query.status as
@@ -56,6 +63,9 @@ export const getAllOrdersController = async (req: Request, res: Response) => {
   }
 };
 
+// ==============================
+// OBTENER PEDIDO POR ID
+// ==============================
 export const getOrderByIdController = async (req: Request, res: Response) => {
   try {
     const id = Number(req.params.id);
@@ -79,6 +89,9 @@ export const getOrderByIdController = async (req: Request, res: Response) => {
   }
 };
 
+// ==============================
+// OBTENER PEDIDOS POR USUARIO
+// ==============================
 export const getOrdersByUserIdController = async (
   req: Request,
   res: Response
@@ -105,6 +118,9 @@ export const getOrdersByUserIdController = async (
   }
 };
 
+// ==============================
+// ACTUALIZAR ESTADO DEL PEDIDO
+// ==============================
 export const updateOrderStatusController = async (
   req: Request,
   res: Response
@@ -121,6 +137,27 @@ export const updateOrderStatusController = async (
     const result = await updateOrderStatusService(id, req.body);
 
     res.status(200).json(result);
+  } catch (error) {
+    const errorMessage =
+      error instanceof Error ? error.message : 'Error interno del servidor';
+
+    res.status(400).json({
+      message: errorMessage,
+    });
+  }
+};
+
+// ==============================
+// CREAR PEDIDO PÚBLICO
+// ==============================
+export const createPublicOrderController = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const result = await createPublicOrderService(req.body);
+
+    res.status(201).json(result);
   } catch (error) {
     const errorMessage =
       error instanceof Error ? error.message : 'Error interno del servidor';

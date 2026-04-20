@@ -1,14 +1,32 @@
-// Importamos la instancia de axios configurada
 import { api } from '../../../services/api';
+import type {
+  CreateOrderPayload,
+  CreateOrderResponse,
+  MenuProductsResponse,
+} from '../types/menu.types';
 
-// Importamos el tipo de respuesta esperado del menú
-import type { MenuProductsResponse } from '../types/menu.types';
-
-// Función para obtener productos visibles del menú público
 export async function getPublicMenuProducts() {
-  // Consumimos la nueva ruta pública del backend
-  const { data } = await api.get<MenuProductsResponse>('/products/public');
+  try {
+    const { data } = await api.get<MenuProductsResponse>('/products/public');
+    return data;
+  } catch (error) {
+    console.error('Error al obtener el menú público:', error);
+    throw error;
+  }
+}
 
-  // Retornamos la respuesta ya tipada
-  return data;
+export async function createPublicOrder(
+  payload: CreateOrderPayload
+): Promise<CreateOrderResponse> {
+  try {
+    const { data } = await api.post<CreateOrderResponse>(
+      '/orders/public',
+      payload
+    );
+
+    return data;
+  } catch (error) {
+    console.error('Error al crear pedido:', error);
+    throw error;
+  }
 }

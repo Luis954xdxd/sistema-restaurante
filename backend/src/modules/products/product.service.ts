@@ -64,6 +64,7 @@ export async function getAllProductsService(query: GetProductsQuery) {
       where,
       include: {
         category: true,
+        inventory: true,
       },
       orderBy: {
         createdAt: 'desc',
@@ -85,7 +86,7 @@ export async function getAllProductsService(query: GetProductsQuery) {
  * Obtiene productos públicos del menú:
  * - solo productos disponibles
  * - solo categorías activas
- * - sin autenticación
+ * - incluye inventario para mostrar stock en frontend
  */
 export async function getPublicProductsService() {
   const products = await prisma.product.findMany({
@@ -97,6 +98,7 @@ export async function getPublicProductsService() {
     },
     include: {
       category: true,
+      inventory: true,
     },
     orderBy: [
       {
@@ -129,6 +131,7 @@ export async function getProductByIdService(id: number) {
     where: { id },
     include: {
       category: true,
+      inventory: true,
     },
   });
 
@@ -172,6 +175,7 @@ export async function updateProductService(id: number, payload: UpdateProductInp
     },
     include: {
       category: true,
+      inventory: true,
     },
   });
 
@@ -197,6 +201,7 @@ export async function toggleProductAvailabilityService(id: number) {
     },
     include: {
       category: true,
+      inventory: true,
     },
   });
 
@@ -242,6 +247,7 @@ export async function deleteProductService(id: number) {
     where: { id },
     include: {
       category: true,
+      inventory: true,
     },
   });
 

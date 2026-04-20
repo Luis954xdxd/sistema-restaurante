@@ -4,13 +4,6 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 import tseslint from 'typescript-eslint'
 import { defineConfig, globalIgnores } from 'eslint/config'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
-
-// Obtenemos la ruta real del directorio actual para que ESLint sepa
-// cuál tsconfig usar dentro de client-web
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 
 export default defineConfig([
   globalIgnores(['dist']),
@@ -23,12 +16,12 @@ export default defineConfig([
       reactRefresh.configs.vite,
     ],
     languageOptions: {
+      parserOptions: {
+        project: './tsconfig.app.json',
+        tsconfigRootDir: import.meta.dirname, // 🔥 ESTA ES LA CLAVE
+      },
       ecmaVersion: 2020,
       globals: globals.browser,
-      parserOptions: {
-        project: ['./tsconfig.app.json', './tsconfig.node.json'],
-        tsconfigRootDir: __dirname,
-      },
     },
   },
 ])

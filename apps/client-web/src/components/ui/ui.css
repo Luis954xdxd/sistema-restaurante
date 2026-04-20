@@ -56,3 +56,106 @@
   margin: 0;
   color: #64748b;
 }
+
+
+.client-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  z-index: 200;
+  backdrop-filter: blur(4px);
+}
+
+.client-modal-card {
+  position: relative;
+  width: 100%;
+  max-width: 520px;
+  border-radius: 28px;
+  padding: 28px;
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.98);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+}
+
+.client-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #eef2f7;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.client-modal-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 16px;
+}
+
+.client-modal-icon.success {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.client-modal-card h3 {
+  margin: 0 0 8px;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.client-modal-card p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.client-order-success-summary {
+  display: grid;
+  gap: 12px;
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 20px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+}
+
+.client-order-success-summary div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.client-order-success-summary span {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.client-order-success-summary strong {
+  color: #0f172a;
+  font-weight: 900;
+}
+
+.client-modal-primary-button {
+  width: 100%;
+  margin-top: 22px;
+  border: none;
+  border-radius: 16px;
+  padding: 15px;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  font-weight: 800;
+  cursor: pointer;
+}

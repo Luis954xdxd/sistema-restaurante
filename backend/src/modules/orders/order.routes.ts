@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import {
   createOrderController,
+  createPublicOrderController,
   getAllOrdersController,
   getOrderByIdController,
   getOrdersByUserIdController,
@@ -11,6 +12,15 @@ import { authorizeRoles } from '../../middlewares/role.middleware';
 
 const router = Router();
 
+/**
+ * Ruta pública para pedidos desde el menú del cliente
+ * No requiere login
+ */
+router.post('/public', createPublicOrderController);
+
+/**
+ * Rutas privadas
+ */
 router.post('/', authenticate, createOrderController);
 
 router.get('/', authenticate, authorizeRoles('ADMIN'), getAllOrdersController);
@@ -20,7 +30,7 @@ router.get('/:id', authenticate, getOrderByIdController);
 router.patch(
   '/:id/status',
   authenticate,
-  authorizeRoles('ADMIN'),
+  authorizeRoles('ADMIN', 'EMPLOYEE'),
   updateOrderStatusController
 );
 
