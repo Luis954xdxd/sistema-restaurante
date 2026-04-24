@@ -13,28 +13,28 @@ const router = Router();
 router.get(
   '/summary',
   authenticate,
-  authorizeRoles('ADMIN'),
+  authorizeRoles('ADMIN','EMPLOYEE'),
   getDashboardSummaryController
 );
 
 router.get(
   '/low-stock',
   authenticate,
-  authorizeRoles('ADMIN'),
+  authorizeRoles('ADMIN','EMPLOYEE'),
   getDashboardLowStockController
 );
 
 router.get(
   '/top-products',
   authenticate,
-  authorizeRoles('ADMIN'),
+  authorizeRoles('ADMIN','EMPLOYEE'),
   getDashboardTopProductsController
 );
 
 router.get(
   '/recent-orders',
   authenticate,
-  authorizeRoles('ADMIN'),
+  authorizeRoles('ADMIN','EMPLOYEE'),
   getDashboardRecentOrdersController
 );
 

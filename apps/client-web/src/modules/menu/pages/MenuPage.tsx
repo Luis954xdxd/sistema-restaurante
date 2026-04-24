@@ -1,66 +1,68 @@
-// ==============================
-// 📦 IMPORTACIONES
-// ==============================
-
-// Hooks de React
+// Importamos hooks de React.
 import { useMemo, useState } from 'react';
 
-// Hook para leer parámetros de la URL (mesa)
+// Importamos useParams para leer la mesa desde la URL.
 import { useParams } from 'react-router-dom';
 
-// Componentes UI
+// Importamos header del cliente.
 import ClientHeader from '../../../components/ui/ClientHeader';
+
+// Importamos estado vacío.
 import EmptyState from '../../../components/ui/EmptyState';
+
+// Importamos modal de éxito.
 import OrderSuccessModal from '../../../components/ui/OrderSuccessModal';
+
+// Importamos estilos UI.
 import '../../../components/ui/ui.css';
 
-// Componentes del menú
+// Importamos tabs de categorías.
 import CategoryTabs from '../../../components/menu/CategoryTabs';
+
+// Importamos grid de productos.
 import ProductGrid from '../../../components/menu/ProductGrid';
+
+// Importamos estilos del menú.
 import '../../../components/menu/menu.css';
 
-// Carrito lateral
+// Importamos carrito lateral.
 import CartDrawer from '../../../components/cart/CartDrawer';
+
+// Importamos estilos del carrito.
 import '../../../components/cart/cart.css';
 
-// Hook para obtener productos
+// Importamos hook que obtiene productos.
 import { useMenu } from '../../../hooks/useMenu';
 
-// Tipos
+// Importamos tipos.
 import type {
   CreateOrderResponse,
   MenuProduct,
 } from '../types/menu.types';
 
-// ==============================
-// 🧾 COMPONENTE PRINCIPAL
-// ==============================
-
+// Componente principal del menú.
 function MenuPage() {
-  // 🔥 Obtenemos el ID de la mesa desde la URL
-  // Ejemplo: /menu/mesa/7 → mesaId = "7"
+  // Leemos mesaId desde la URL. Ejemplo: /menu/mesa/7.
   const { mesaId } = useParams();
 
-  // Estado para abrir/cerrar carrito
+  // Estado para abrir o cerrar carrito.
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Estado para categoría seleccionada
+  // Estado de categoría activa.
   const [activeCategoryId, setActiveCategoryId] =
     useState<number | null>(null);
 
-  // Estado para el modal de éxito
+  // Estado para guardar el pedido exitoso.
   const [successOrder, setSuccessOrder] =
     useState<CreateOrderResponse['order'] | null>(null);
 
-  // 🔥 Hook que trae productos del backend
+  // Traemos productos del backend.
   const { data, isLoading, isError } = useMenu();
 
-  // Lista de productos
+  // Obtenemos lista de productos.
   const products: MenuProduct[] = data?.data ?? [];
 
-  // ==============================
-  // 📊 CATEGORÍAS ÚNICAS
-  // ==============================
+  // Creamos lista única de categorías.
   const categories = useMemo(() => {
     const map = new Map<number, { id: number; name: string }>();
 
@@ -74,9 +76,7 @@ function MenuPage() {
     return Array.from(map.values());
   }, [products]);
 
-  // ==============================
-  // 🔍 FILTRAR PRODUCTOS
-  // ==============================
+  // Filtramos productos por categoría seleccionada.
   const filteredProducts = useMemo(() => {
     if (activeCategoryId === null) return products;
 
@@ -85,30 +85,23 @@ function MenuPage() {
     );
   }, [products, activeCategoryId]);
 
-  // ==============================
-  // 🪑 TEXTO DE LA MESA
-  // ==============================
+  // Creamos texto de mesa para mostrarlo en pantalla.
   const mesaLabel = mesaId ? `Mesa #${mesaId}` : null;
 
-  // ==============================
-  // 🎨 RENDER
-  // ==============================
+  // Render principal.
   return (
     <div className="client-menu-page">
-      {/* Header */}
       <ClientHeader
         onOpenCart={() => setIsCartOpen(true)}
         mesaLabel={mesaLabel}
       />
 
-      {/* Tabs de categorías */}
       <CategoryTabs
         categories={categories}
         activeCategoryId={activeCategoryId}
         onSelectCategory={setActiveCategoryId}
       />
 
-      {/* Estado de carga */}
       {isLoading ? (
         <EmptyState
           title="Cargando menú..."
@@ -123,15 +116,13 @@ function MenuPage() {
         <ProductGrid products={filteredProducts} />
       )}
 
-      {/* 🔥 CARRITO (IMPORTANTE: aquí pasamos la mesa) */}
       <CartDrawer
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
         onOrderSuccess={(order) => setSuccessOrder(order)}
-        mesaId={mesaId} // 👈 AQUÍ PASAMOS LA MESA
+        mesaId={mesaId}
       />
 
-      {/* MODAL DE ÉXITO */}
       <OrderSuccessModal
         isOpen={Boolean(successOrder)}
         order={successOrder}
@@ -141,5 +132,5 @@ function MenuPage() {
   );
 }
 
-// Exportamos
+// Exportamos la página.
 export default MenuPage;

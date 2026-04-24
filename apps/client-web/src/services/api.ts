@@ -1,8 +1,22 @@
-// Importamos axios
 import axios from 'axios';
 
-// Creamos una instancia base para consumir el backend
+const API_HOST = window.location.hostname;
+const API_BASE_URL = `http://${API_HOST}:5000/api`;
+
 export const api = axios.create({
-  // URL base del backend
-  baseURL: 'http://localhost:5000/api',
+  baseURL: API_BASE_URL,
+  timeout: 10000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('restaurant_admin_token');
+
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+
+  return config;
 });

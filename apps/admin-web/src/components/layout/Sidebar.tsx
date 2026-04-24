@@ -1,6 +1,21 @@
-import { LayoutDashboard, Shapes, Package, Boxes, ClipboardList, FileText } from 'lucide-react';
+// ==============================
+// IMPORTACIONES
+// ==============================
+import {
+  LayoutDashboard,
+  Shapes,
+  Package,
+  Boxes,
+  ClipboardList,
+  FileText,
+  QrCode, // 👈 NUEVO ICONO
+} from 'lucide-react';
+
 import { NavLink } from 'react-router-dom';
 
+// ==============================
+// ITEMS DEL MENÚ
+// ==============================
 const navItems = [
   { to: '/dashboard', label: 'Panel', icon: LayoutDashboard },
   { to: '/categories', label: 'Categorías', icon: Shapes },
@@ -8,11 +23,20 @@ const navItems = [
   { to: '/inventory', label: 'Inventario', icon: Boxes },
   { to: '/orders', label: 'Pedidos', icon: ClipboardList },
   { to: '/reports', label: 'Informes', icon: FileText },
+
+  // 🔥 NUEVA OPCIÓN QR
+  { to: '/tables-qr', label: 'Mesas (QR)', icon: QrCode },
 ];
 
+// ==============================
+// COMPONENTE
+// ==============================
 function Sidebar() {
   return (
     <aside className="sidebar">
+      {/* ==============================
+          LOGO / HEADER
+      ============================== */}
       <div className="sidebar-brand">
         <div className="sidebar-brand-badge">RS</div>
 
@@ -22,6 +46,9 @@ function Sidebar() {
         </div>
       </div>
 
+      {/* ==============================
+          NAVEGACIÓN
+      ============================== */}
       <nav className="sidebar-nav">
         {navItems.map((item) => {
           const Icon = item.icon;

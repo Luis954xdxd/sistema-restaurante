@@ -1,22 +1,23 @@
-// Importamos componentes de react-router-dom
+// Importamos componentes de React Router.
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 
-// Importamos la página principal del menú
+// Importamos la página del menú.
 import MenuPage from '../modules/menu/pages/MenuPage';
 
-// Router principal
+// Creamos el router principal del cliente.
 export function AppRouter() {
+  // Retornamos las rutas.
   return (
     <BrowserRouter>
       <Routes>
-        {/* Ruta principal del menú */}
-        <Route path="/" element={<MenuPage />} />
+        {/* Ruta normal del menú */}
+        <Route path="/menu" element={<MenuPage />} />
 
-        {/* Ruta para futuro menú por mesa */}
+        {/* Ruta que abre el menú con número de mesa */}
         <Route path="/menu/mesa/:mesaId" element={<MenuPage />} />
 
-        {/* Cualquier otra ruta redirige al inicio */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {/* Si la ruta no existe, mandamos al menú */}
+        <Route path="*" element={<Navigate to="/menu" replace />} />
       </Routes>
     </BrowserRouter>
   );

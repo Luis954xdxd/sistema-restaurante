@@ -127,3 +127,13 @@ model OrderItem {
   product   Product  @relation(fields: [productId], references: [id])
   createdAt DateTime @default(now())
 }
+
+
+model RestaurantTable {
+  id          Int      @id @default(autoincrement())
+  number      Int      @unique
+  qrCodeUrl   String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
