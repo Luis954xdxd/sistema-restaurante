@@ -38,6 +38,7 @@ export interface GetOrdersQuery {
   date?: string;
   page?: number;
   limit?: number;
+  tableNumber?: number;
 }
 
 // ==============================

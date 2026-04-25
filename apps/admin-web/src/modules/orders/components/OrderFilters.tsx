@@ -1,30 +1,28 @@
-
-
 interface Props {
   status: string;
-  userId: string;
+  tableNumber: string;
   date: string;
   onStatusChange: (value: string) => void;
-  onUserIdChange: (value: string) => void;
+  onTableNumberChange: (value: string) => void;
   onDateChange: (value: string) => void;
   onReset: () => void;
 }
 
 function OrderFilters({
   status,
-  userId,
+  tableNumber,
   date,
   onStatusChange,
-  onUserIdChange,
+  onTableNumberChange,
   onDateChange,
   onReset,
 }: Props) {
   return (
     <div className="order-filters">
       <div className="order-filter-group">
-        <label htmlFor="order-status-filter">Estado</label>
+        <label>Estado</label>
+
         <select
-          id="order-status-filter"
           value={status}
           onChange={(e) => onStatusChange(e.target.value)}
         >
@@ -38,21 +36,21 @@ function OrderFilters({
       </div>
 
       <div className="order-filter-group">
-        <label htmlFor="order-user-filter">ID Usuario</label>
+        <label>Mesa</label>
+
         <input
-          id="order-user-filter"
           type="number"
           min="1"
-          value={userId}
-          onChange={(e) => onUserIdChange(e.target.value)}
-          placeholder="Ej. 1"
+          value={tableNumber}
+          onChange={(e) => onTableNumberChange(e.target.value)}
+          placeholder="Ej. 5"
         />
       </div>
 
       <div className="order-filter-group">
-        <label htmlFor="order-date-filter">Fecha</label>
+        <label>Fecha</label>
+
         <input
-          id="order-date-filter"
           type="date"
           value={date}
           onChange={(e) => onDateChange(e.target.value)}
@@ -60,7 +58,7 @@ function OrderFilters({
       </div>
 
       <div className="order-filter-actions">
-        <button type="button" className="button-secondary" onClick={onReset}>
+        <button type="button" className="button button-ghost" onClick={onReset}>
           Limpiar filtros
         </button>
       </div>

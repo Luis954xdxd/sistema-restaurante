@@ -23,7 +23,7 @@ router.post('/public', createPublicOrderController);
  */
 router.post('/', authenticate, createOrderController);
 
-router.get('/', authenticate, authorizeRoles('ADMIN'), getAllOrdersController);
+router.get('/', authenticate, authorizeRoles('ADMIN', 'EMPLOYEE'), getAllOrdersController);
 router.get('/user/:userId', authenticate, getOrdersByUserIdController);
 router.get('/:id', authenticate, getOrderByIdController);
 

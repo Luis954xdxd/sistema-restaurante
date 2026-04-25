@@ -1,4 +1,5 @@
 import { api } from '../../../services/api';
+
 import type {
   GetOrdersParams,
   OrderMutationResponse,
@@ -13,8 +14,8 @@ function buildOrdersQuery(params: GetOrdersParams) {
     queryParams.set('status', params.status);
   }
 
-  if (typeof params.userId === 'number') {
-    queryParams.set('userId', String(params.userId));
+  if (typeof params.tableNumber === 'number') {
+    queryParams.set('tableNumber', String(params.tableNumber));
   }
 
   if (params.date) {
@@ -30,6 +31,7 @@ function buildOrdersQuery(params: GetOrdersParams) {
   }
 
   const queryString = queryParams.toString();
+
   return queryString ? `/orders?${queryString}` : '/orders';
 }
 
@@ -46,5 +48,6 @@ export async function updateOrderStatus(
     `/orders/${id}/status`,
     payload
   );
+
   return data;
 }

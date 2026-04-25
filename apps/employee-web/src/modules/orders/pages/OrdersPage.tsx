@@ -1,67 +1,85 @@
-// Importamos React Query
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isAxiosError } from 'axios';
-// Importamos useState para filtros y selección
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
-// Importamos UI base
 import PageHeader from '../../../components/ui/PageHeader';
 import '../../../components/ui/ui.css';
 
-// Importamos componentes del módulo
 import OrderFilters from '../components/OrderFilters';
 import OrderPaginationControls from '../components/OrderPaginationControls';
 import OrdersTable from '../components/OrdersTable';
 import OrderStatusUpdateForm from '../components/OrderStatusUpdateForm';
 
-// Importamos servicios
 import { getOrders, updateOrderStatus } from '../services/orders.service';
+import { socket } from '../../../services/socket';
 
-// Importamos estilos del módulo
 import '../styles/orders.css';
 
-// Importamos tipos
 import type { Order, OrderStatus } from '../types/orders.types';
 
-// Página real de pedidos del empleado
 function OrdersPage() {
   const queryClient = useQueryClient();
 
-  // Estado del filtro status
   const [status, setStatus] = useState('');
-
-  // Estado del filtro userId
-  const [userId, setUserId] = useState('');
-
-  // Estado del filtro fecha
+  const [tableNumber, setTableNumber] = useState('');
   const [date, setDate] = useState('');
-
-  // Estado de página actual
   const [page, setPage] = useState(1);
 
-  // Pedido seleccionado para gestionar
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
 
-  // Mensaje visual
   const [feedback, setFeedback] = useState<{
     type: 'success' | 'error';
     text: string;
   } | null>(null);
 
-  // Query para obtener pedidos
   const ordersQuery = useQuery({
-    queryKey: ['employee-orders', status, userId, date, page],
+    queryKey: ['employee-orders', status, tableNumber, date, page],
     queryFn: () =>
       getOrders({
         status: status ? (status as OrderStatus) : undefined,
-        userId: userId ? Number(userId) : undefined,
+        tableNumber: tableNumber ? Number(tableNumber) : undefined,
         date: date || undefined,
         page,
         limit: 5,
       }),
+    refetchInterval: 5000,
+    refetchOnWindowFocus: true,
   });
 
-  // Mutación para cambiar el estado del pedido
+  useEffect(() => {
+    if (!socket.connected) {
+      socket.connect();
+    }
+
+    const handleOrderCreated = () => {
+      queryClient.invalidateQueries({ queryKey: ['employee-orders'] });
+      queryClient.invalidateQueries({
+        queryKey: ['employee-dashboard-summary'],
+      });
+
+      const audio = new Audio('/notification.mp3');
+
+      audio.play().catch(() => {
+        console.log('El navegador bloqueó el sonido hasta que haya interacción.');
+      });
+    };
+
+    const handleOrderUpdated = () => {
+      queryClient.invalidateQueries({ queryKey: ['employee-orders'] });
+      queryClient.invalidateQueries({
+        queryKey: ['employee-dashboard-summary'],
+      });
+    };
+
+    socket.on('order:created', handleOrderCreated);
+    socket.on('order:updated', handleOrderUpdated);
+
+    return () => {
+      socket.off('order:created', handleOrderCreated);
+      socket.off('order:updated', handleOrderUpdated);
+    };
+  }, [queryClient]);
+
   const updateStatusMutation = useMutation({
     mutationFn: ({
       id,
@@ -74,41 +92,36 @@ function OrdersPage() {
     onSuccess: (response) => {
       setFeedback({ type: 'success', text: response.message });
 
-      // Refrescamos pedidos
       queryClient.invalidateQueries({ queryKey: ['employee-orders'] });
-
-      // Refrescamos dashboard del empleado
-      queryClient.invalidateQueries({ queryKey: ['employee-dashboard-summary'] });
+      queryClient.invalidateQueries({
+        queryKey: ['employee-dashboard-summary'],
+      });
 
       setSelectedOrder(null);
     },
 
     onError: (error: unknown) => {
-  // Validamos si es error de axios
-  if (isAxiosError(error)) {
-    setFeedback({
-      type: 'error',
-      text:
-        error.response?.data?.message ||
-        'No se pudo actualizar el pedido',
-    });
-  } else {
-    // Error genérico
-    setFeedback({
-      type: 'error',
-      text: 'Error inesperado al actualizar el pedido',
-    });
-  }
-}
+      if (isAxiosError(error)) {
+        setFeedback({
+          type: 'error',
+          text:
+            error.response?.data?.message ||
+            'No se pudo actualizar el pedido',
+        });
+      } else {
+        setFeedback({
+          type: 'error',
+          text: 'Error inesperado al actualizar el pedido',
+        });
+      }
+    },
   });
 
-  // Función para seleccionar un pedido
   const handleSelectOrder = (order: Order) => {
     setSelectedOrder(order);
     setFeedback(null);
   };
 
-  // Función para enviar actualización de estado
   const handleSubmitStatus = (values: { status: OrderStatus }) => {
     if (!selectedOrder) return;
 
@@ -120,15 +133,13 @@ function OrdersPage() {
     });
   };
 
-  // Función para limpiar filtros
   const handleResetFilters = () => {
     setStatus('');
-    setUserId('');
+    setTableNumber('');
     setDate('');
     setPage(1);
   };
 
-  // Datos finales
   const orders = ordersQuery.data?.data ?? [];
   const pagination = ordersQuery.data?.pagination;
 
@@ -163,14 +174,14 @@ function OrdersPage() {
 
           <OrderFilters
             status={status}
-            userId={userId}
+            tableNumber={tableNumber}
             date={date}
             onStatusChange={(value) => {
               setStatus(value);
               setPage(1);
             }}
-            onUserIdChange={(value) => {
-              setUserId(value);
+            onTableNumberChange={(value) => {
+              setTableNumber(value);
               setPage(1);
             }}
             onDateChange={(value) => {

@@ -27,7 +27,7 @@ function TablesQrPage() {
 
       // IMPORTANTE:
       // Cambia esta IP por la IPv4 de tu computadora para que el celular pueda abrir el menú.
-      await downloadTableQrPdf('http://192.168.1.9:5173');
+      await downloadTableQrPdf('http://192.168.100.208: 5174');
 
       // Mostramos mensaje de éxito.
       setFeedback('QR de mesa generado correctamente.');

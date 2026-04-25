@@ -20,6 +20,7 @@ function OrdersTable({ orders, onSelect }: Props) {
         <thead>
           <tr>
             <th>ID</th>
+            <th>Mesa</th>
             <th>Cliente</th>
             <th>Estado</th>
             <th>Subtotal</th>
@@ -35,18 +36,29 @@ function OrdersTable({ orders, onSelect }: Props) {
           {orders.map((order) => (
             <tr key={order.id}>
               <td>{order.id}</td>
+
+              <td>
+                {order.tableNumber ? `Mesa #${order.tableNumber}` : 'Sin mesa'}
+              </td>
+
               <td>
                 {order.user.firstName} {order.user.lastName}
               </td>
+
               <td>
-                <span className={`order-status-badge order-status-${order.status.toLowerCase()}`}>
+                <span
+                  className={`order-status-badge order-status-${order.status.toLowerCase()}`}
+                >
                   {order.status}
                 </span>
               </td>
-              <td>${order.subtotal}</td>
-              <td>${order.tipAmount}</td>
-              <td>${order.total}</td>
-              <td>{new Date(order.createdAt).toLocaleString()}</td>
+
+              <td>${Number(order.subtotal).toFixed(2)}</td>
+              <td>${Number(order.tipAmount).toFixed(2)}</td>
+              <td>${Number(order.total).toFixed(2)}</td>
+
+              <td>{new Date(order.createdAt).toLocaleString('es-MX')}</td>
+
               <td>
                 <div className="order-items-preview">
                   {order.items.map((item) => (
@@ -56,10 +68,11 @@ function OrdersTable({ orders, onSelect }: Props) {
                   ))}
                 </div>
               </td>
+
               <td>
                 <button
                   type="button"
-                  className="button-secondary"
+                  className="order-action-button"
                   onClick={() => onSelect(order)}
                 >
                   Gestionar

@@ -8,6 +8,7 @@ import type {
   GetOrdersQuery,
   UpdateOrderStatusInput,
 } from './order.types';
+import { getSocket } from '../../socket';
 
 // ==============================
 // CREAR PEDIDO INTERNO
@@ -198,8 +199,7 @@ export const createOrderService = async (input: CreateOrderInput) => {
 // OBTENER TODOS LOS PEDIDOS
 // ==============================
 export const getAllOrdersService = async (query: GetOrdersQuery) => {
-  const { status, userId, date, page, limit } = query;
-
+  const { status, userId, tableNumber, date, page, limit } = query;
   const { page: currentPage, limit: currentLimit, skip } = getPaginationParams(
     page,
     limit
@@ -208,6 +208,7 @@ export const getAllOrdersService = async (query: GetOrdersQuery) => {
   const where: {
     status?: 'PENDING' | 'IN_PREPARATION' | 'READY' | 'DELIVERED' | 'CANCELLED';
     userId?: number;
+    tableNumber?: number;
     createdAt?: {
       gte: Date;
       lte: Date;
@@ -221,6 +222,9 @@ export const getAllOrdersService = async (query: GetOrdersQuery) => {
   if (typeof userId === 'number' && !Number.isNaN(userId)) {
     where.userId = userId;
   }
+  if (typeof tableNumber === 'number' && !Number.isNaN(tableNumber)) {
+  where.tableNumber = tableNumber;
+}
 
   if (date) {
     const { startOfDay, endOfDay } = getDayRange(date);
@@ -596,6 +600,18 @@ export async function createPublicOrderService(payload: CreatePublicOrderInput) 
   if (!createdOrder) {
     throw new AppError('No se pudo crear el pedido público', 500);
   }
+
+  // Emitimos evento en tiempo real para admin y empleado
+try {
+  const io = getSocket();
+
+  io.emit('order:created', {
+    message: 'Nuevo pedido recibido',
+    order: createdOrder,
+  });
+} catch (error) {
+  console.error('No se pudo emitir evento order:created:', error);
+}
 
   return {
     message: 'Pedido realizado correctamente',

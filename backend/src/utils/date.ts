@@ -1,9 +1,5 @@
-export const getDayRange = (dateString?: string) => {
-  const baseDate = dateString ? new Date(dateString) : new Date();
-
-  if (Number.isNaN(baseDate.getTime())) {
-    throw new Error('La fecha proporcionada no es válida');
-  }
+export function getDayRange(date?: string) {
+  const baseDate = date ? new Date(`${date}T00:00:00`) : new Date();
 
   const startOfDay = new Date(baseDate);
   startOfDay.setHours(0, 0, 0, 0);
@@ -16,7 +12,7 @@ export const getDayRange = (dateString?: string) => {
     startOfDay,
     endOfDay,
   };
-};
+}
 
 export const formatDateForDisplay = (date: Date) => {
   return date.toLocaleDateString('es-MX', {

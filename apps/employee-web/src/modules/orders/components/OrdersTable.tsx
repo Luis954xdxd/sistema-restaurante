@@ -9,7 +9,6 @@ interface Props {
 
 // Tabla de pedidos
 function OrdersTable({ orders, onSelect }: Props) {
-  // Si no hay pedidos, mostramos estado vacío
   if (orders.length === 0) {
     return (
       <div className="employee-order-empty-state">
@@ -24,6 +23,7 @@ function OrdersTable({ orders, onSelect }: Props) {
         <thead>
           <tr>
             <th>ID</th>
+            <th>Mesa</th>
             <th>Cliente</th>
             <th>Estado</th>
             <th>Subtotal</th>
@@ -41,6 +41,10 @@ function OrdersTable({ orders, onSelect }: Props) {
               <td>{order.id}</td>
 
               <td>
+                {order.tableNumber ? `Mesa #${order.tableNumber}` : 'Sin mesa'}
+              </td>
+
+              <td>
                 {order.user.firstName} {order.user.lastName}
               </td>
 
@@ -52,10 +56,11 @@ function OrdersTable({ orders, onSelect }: Props) {
                 </span>
               </td>
 
-              <td>${order.subtotal}</td>
-              <td>${order.tipAmount}</td>
-              <td>${order.total}</td>
-              <td>{new Date(order.createdAt).toLocaleString()}</td>
+              <td>${Number(order.subtotal).toFixed(2)}</td>
+              <td>${Number(order.tipAmount).toFixed(2)}</td>
+              <td>${Number(order.total).toFixed(2)}</td>
+
+              <td>{new Date(order.createdAt).toLocaleString('es-MX')}</td>
 
               <td>
                 <div className="employee-order-items-preview">
@@ -70,7 +75,7 @@ function OrdersTable({ orders, onSelect }: Props) {
               <td>
                 <button
                   type="button"
-                  className="button-secondary"
+                  className="employee-order-action-button"
                   onClick={() => onSelect(order)}
                 >
                   Gestionar

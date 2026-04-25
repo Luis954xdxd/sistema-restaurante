@@ -1,36 +1,80 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useState } from 'react';
+import { isAxiosError } from 'axios';
+import { useEffect, useState } from 'react';
+
 import PageHeader from '../../../components/ui/PageHeader';
 import '../../../components/ui/ui.css';
+
 import OrderFilters from '../components/OrderFilters';
 import OrderPaginationControls from '../components/OrderPaginationControls';
 import OrdersTable from '../components/OrdersTable';
 import OrderStatusUpdateForm from '../components/OrderStatusUpdateForm';
+
 import { getOrders, updateOrderStatus } from '../services/orders.service';
+import { socket } from '../../../services/socket';
+
 import '../styles/orders.css';
+
 import type { Order, OrderStatus } from '../types/orders.types';
 
 function OrdersPage() {
   const queryClient = useQueryClient();
 
   const [status, setStatus] = useState('');
-  const [userId, setUserId] = useState('');
+  const [tableNumber, setTableNumber] = useState('');
   const [date, setDate] = useState('');
   const [page, setPage] = useState(1);
+
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+
+  const [feedback, setFeedback] = useState<{
+    type: 'success' | 'error';
+    text: string;
+  } | null>(null);
 
   const ordersQuery = useQuery({
-    queryKey: ['orders', status, userId, date, page],
+    queryKey: ['orders', status, tableNumber, date, page],
     queryFn: () =>
       getOrders({
         status: status ? (status as OrderStatus) : undefined,
-        userId: userId ? Number(userId) : undefined,
+        tableNumber: tableNumber ? Number(tableNumber) : undefined,
         date: date || undefined,
         page,
         limit: 5,
       }),
+    refetchInterval: 5000,
+    refetchOnWindowFocus: true,
   });
+
+  useEffect(() => {
+    if (!socket.connected) {
+      socket.connect();
+    }
+
+    const handleOrderCreated = () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] });
+
+      const audio = new Audio('/notification.mp3');
+
+      audio.play().catch(() => {
+        console.log('El navegador bloqueó el sonido hasta que haya interacción.');
+      });
+    };
+
+    const handleOrderUpdated = () => {
+      queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] });
+    };
+
+    socket.on('order:created', handleOrderCreated);
+    socket.on('order:updated', handleOrderUpdated);
+
+    return () => {
+      socket.off('order:created', handleOrderCreated);
+      socket.off('order:updated', handleOrderUpdated);
+    };
+  }, [queryClient]);
 
   const updateStatusMutation = useMutation({
     mutationFn: ({
@@ -40,16 +84,30 @@ function OrdersPage() {
       id: number;
       payload: { status: OrderStatus };
     }) => updateOrderStatus(id, payload),
+
     onSuccess: (response) => {
       setFeedback({ type: 'success', text: response.message });
+
       queryClient.invalidateQueries({ queryKey: ['orders'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-summary'] });
+
       setSelectedOrder(null);
     },
-    onError: (error: any) => {
-      setFeedback({
-        type: 'error',
-        text: error?.response?.data?.message || 'No se pudo actualizar el pedido',
-      });
+
+    onError: (error: unknown) => {
+      if (isAxiosError(error)) {
+        setFeedback({
+          type: 'error',
+          text:
+            error.response?.data?.message ||
+            'No se pudo actualizar el pedido',
+        });
+      } else {
+        setFeedback({
+          type: 'error',
+          text: 'Error inesperado al actualizar el pedido',
+        });
+      }
     },
   });
 
@@ -62,6 +120,7 @@ function OrdersPage() {
     if (!selectedOrder) return;
 
     setFeedback(null);
+
     updateStatusMutation.mutate({
       id: selectedOrder.id,
       payload: values,
@@ -70,7 +129,7 @@ function OrdersPage() {
 
   const handleResetFilters = () => {
     setStatus('');
-    setUserId('');
+    setTableNumber('');
     setDate('');
     setPage(1);
   };
@@ -109,14 +168,14 @@ function OrdersPage() {
 
           <OrderFilters
             status={status}
-            userId={userId}
+            tableNumber={tableNumber}
             date={date}
             onStatusChange={(value) => {
               setStatus(value);
               setPage(1);
             }}
-            onUserIdChange={(value) => {
-              setUserId(value);
+            onTableNumberChange={(value) => {
+              setTableNumber(value);
               setPage(1);
             }}
             onDateChange={(value) => {

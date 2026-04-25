@@ -43,10 +43,12 @@ export const getAllOrdersController = async (req: Request, res: Response) => {
     const date = req.query.date as string | undefined;
     const page = req.query.page ? Number(req.query.page) : undefined;
     const limit = req.query.limit ? Number(req.query.limit) : undefined;
+    const tableNumber = req.query.tableNumber? Number(req.query.tableNumber): undefined;
 
     const result = await getAllOrdersService({
       status,
       userId,
+      tableNumber,
       date,
       page,
       limit,

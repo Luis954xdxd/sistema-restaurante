@@ -47,6 +47,7 @@ export interface Order {
   subtotal: string;
   tipAmount: string;
   total: string;
+  tableNumber?: number | null;
   createdAt: string;
   updatedAt: string;
   user: OrderUser;
@@ -68,7 +69,7 @@ export interface OrdersResponse {
 
 export interface GetOrdersParams {
   status?: OrderStatus;
-  userId?: number;
+  tableNumber?: number;
   date?: string;
   page?: number;
   limit?: number;
