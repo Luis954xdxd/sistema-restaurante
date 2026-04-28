@@ -1,5 +1,5 @@
 // Importamos iconos
-import { Boxes, ClipboardList, LayoutDashboard } from 'lucide-react';
+import {Boxes,ChefHat,ClipboardList,HandPlatter,LayoutDashboard,} from 'lucide-react';
 
 // Importamos NavLink para navegación con estado activo
 import { NavLink } from 'react-router-dom';
@@ -9,6 +9,8 @@ const navItems = [
   { to: '/dashboard', label: 'Panel', icon: LayoutDashboard },
   { to: '/orders', label: 'Pedidos', icon: ClipboardList },
   { to: '/inventory', label: 'Inventario', icon: Boxes },
+  { to: '/kitchen', label: 'Cocina', icon: ChefHat },
+  { to: '/waiter', label: 'Mesero', icon: HandPlatter },
 ];
 
 // Sidebar del panel de empleado

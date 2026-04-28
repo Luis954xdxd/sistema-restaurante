@@ -1,28 +1,24 @@
-// Importamos Server de socket.io
+// Importamos Server de Socket.IO
 import { Server } from 'socket.io';
 
-// Importamos tipo Server HTTP de Node
+// Importamos tipo del servidor HTTP
 import type { Server as HttpServer } from 'http';
 
-// Variable global donde guardaremos la instancia de Socket.IO
+// Guardamos la instancia global de Socket.IO
 let io: Server | null = null;
 
-// Función para inicializar Socket.IO
+// Inicializamos Socket.IO
 export function initSocket(server: HttpServer) {
-  // Creamos el servidor de sockets
   io = new Server(server, {
-    // Configuramos CORS para permitir conexión desde frontends
     cors: {
       origin: '*',
       methods: ['GET', 'POST', 'PATCH'],
     },
   });
 
-  // Evento cuando un cliente se conecta
   io.on('connection', (socket) => {
     console.log('Cliente conectado a Socket.IO:', socket.id);
 
-    // Evento cuando un cliente se desconecta
     socket.on('disconnect', () => {
       console.log('Cliente desconectado de Socket.IO:', socket.id);
     });
@@ -31,13 +27,11 @@ export function initSocket(server: HttpServer) {
   return io;
 }
 
-// Función para obtener la instancia de socket
+// Obtenemos Socket.IO desde otros archivos
 export function getSocket() {
-  // Si io no existe, significa que no se inicializó
   if (!io) {
     throw new Error('Socket.IO no ha sido inicializado');
   }
 
-  // Retornamos instancia
   return io;
 }

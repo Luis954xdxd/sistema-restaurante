@@ -1,0 +1,244 @@
+.kitchen-orders-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 22px;
+  margin-top: 24px;
+}
+
+.kitchen-order-card {
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(226, 232, 240, 0.95);
+  border-radius: 26px;
+  padding: 22px;
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.1);
+  backdrop-filter: blur(16px);
+}
+
+.kitchen-order-card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.kitchen-order-eyebrow {
+  display: inline-flex;
+  margin-bottom: 6px;
+  font-size: 13px;
+  font-weight: 900;
+  color: #2563eb;
+}
+
+.kitchen-order-card h3 {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.kitchen-status-badge {
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.kitchen-status-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.kitchen-status-in_preparation {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.kitchen-order-meta {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 18px;
+}
+
+.kitchen-order-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.kitchen-order-items {
+  display: grid;
+  gap: 10px;
+  margin: 18px 0;
+}
+
+.kitchen-order-item {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  padding: 12px 14px;
+  border-radius: 16px;
+}
+
+.kitchen-order-item strong {
+  color: #2563eb;
+  font-size: 16px;
+}
+
+.kitchen-order-item span {
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.kitchen-order-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.kitchen-order-total span {
+  color: #64748b;
+  font-weight: 700;
+}
+
+.kitchen-order-total strong {
+  color: #0f172a;
+  font-size: 22px;
+  font-weight: 900;
+}
+
+.kitchen-order-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.kitchen-action-button {
+  width: 100%;
+  border: none;
+  border-radius: 16px;
+  padding: 13px 16px;
+  font-weight: 900;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.kitchen-action-button:hover {
+  transform: translateY(-1px);
+}
+
+.kitchen-action-button.start {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: #ffffff;
+  box-shadow: 0 12px 24px rgba(249, 115, 22, 0.25);
+}
+
+.kitchen-action-button.ready {
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #ffffff;
+  box-shadow: 0 12px 24px rgba(34, 197, 94, 0.25);
+}
+
+.kitchen-action-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.kitchen-empty-state {
+  margin-top: 24px;
+  padding: 28px;
+  border-radius: 22px;
+  background: white;
+  border: 1px dashed #cbd5e1;
+  color: #64748b;
+  text-align: center;
+  font-weight: 700;
+}
+
+.kitchen-realtime-toast {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
+
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  min-width: 300px;
+  max-width: 420px;
+
+  padding: 16px 18px;
+  border-radius: 18px;
+
+  background: rgba(15, 23, 42, 0.96);
+  color: #ffffff;
+
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.35);
+  animation: kitchenToastIn 0.25s ease;
+}
+
+.kitchen-realtime-toast-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(37, 99, 235, 0.18);
+  font-size: 22px;
+}
+
+.kitchen-realtime-toast strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 900;
+  margin-bottom: 3px;
+}
+
+.kitchen-realtime-toast span {
+  display: block;
+  font-size: 13px;
+  color: #cbd5e1;
+}
+
+@keyframes kitchenToastIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) translateX(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) translateX(0);
+  }
+}
+
+@media (max-width: 640px) {
+  .kitchen-orders-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .kitchen-realtime-toast {
+    left: 16px;
+    right: 16px;
+    top: 16px;
+    min-width: auto;
+  }
+}

@@ -1,13 +1,27 @@
+// Importamos Prisma para trabajar con la base de datos
 import prisma from '../../config/prisma';
+
+// Importamos AppError para lanzar errores controlados
 import { AppError } from '../../shared/errors/AppError';
-import { buildPaginatedResponse, getPaginationParams } from '../../utils/pagination';
+
+// Importamos helpers de paginación
+import {
+  buildPaginatedResponse,
+  getPaginationParams,
+} from '../../utils/pagination';
+
+// Importamos helper para calcular rango de fechas
 import { getDayRange } from '../../utils/date';
+
+// Importamos tipos del módulo de pedidos
 import type {
   CreateOrderInput,
   CreatePublicOrderInput,
   GetOrdersQuery,
   UpdateOrderStatusInput,
 } from './order.types';
+
+// Importamos Socket.IO del backend
 import { getSocket } from '../../socket';
 
 // ==============================
@@ -46,7 +60,10 @@ export const createOrderService = async (input: CreateOrderInput) => {
   }
 
   if (existingUser.status !== 'ACTIVE') {
-    throw new AppError('No se puede crear un pedido con un usuario inactivo', 400);
+    throw new AppError(
+      'No se puede crear un pedido con un usuario inactivo',
+      400
+    );
   }
 
   let subtotal = 0;
@@ -64,7 +81,10 @@ export const createOrderService = async (input: CreateOrderInput) => {
     }
 
     if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
-      throw new AppError('Cada quantity debe ser un número entero mayor a 0', 400);
+      throw new AppError(
+        'Cada quantity debe ser un número entero mayor a 0',
+        400
+      );
     }
 
     const product = await prisma.product.findUnique({
@@ -82,7 +102,10 @@ export const createOrderService = async (input: CreateOrderInput) => {
     }
 
     if (!product.isAvailable) {
-      throw new AppError(`El producto "${product.name}" no está disponible`, 400);
+      throw new AppError(
+        `El producto "${product.name}" no está disponible`,
+        400
+      );
     }
 
     if (!product.category.isActive) {
@@ -200,6 +223,7 @@ export const createOrderService = async (input: CreateOrderInput) => {
 // ==============================
 export const getAllOrdersService = async (query: GetOrdersQuery) => {
   const { status, userId, tableNumber, date, page, limit } = query;
+
   const { page: currentPage, limit: currentLimit, skip } = getPaginationParams(
     page,
     limit
@@ -222,9 +246,10 @@ export const getAllOrdersService = async (query: GetOrdersQuery) => {
   if (typeof userId === 'number' && !Number.isNaN(userId)) {
     where.userId = userId;
   }
+
   if (typeof tableNumber === 'number' && !Number.isNaN(tableNumber)) {
-  where.tableNumber = tableNumber;
-}
+    where.tableNumber = tableNumber;
+  }
 
   if (date) {
     const { startOfDay, endOfDay } = getDayRange(date);
@@ -406,6 +431,22 @@ export const updateOrderStatusService = async (
       });
     });
 
+    try {
+      const io = getSocket();
+
+      console.log(
+        'Emitiendo evento order:updated para pedido:',
+        updatedOrder?.id
+      );
+
+      io.emit('order:updated', {
+        message: 'Pedido actualizado',
+        order: updatedOrder,
+      });
+    } catch (error) {
+      console.error('No se pudo emitir evento order:updated:', error);
+    }
+
     return {
       message: 'Pedido cancelado correctamente y stock restaurado',
       order: updatedOrder,
@@ -428,6 +469,19 @@ export const updateOrderStatusService = async (
       },
     },
   });
+
+  try {
+    const io = getSocket();
+
+    console.log('Emitiendo evento order:updated para pedido:', updatedOrder.id);
+
+    io.emit('order:updated', {
+      message: 'Pedido actualizado',
+      order: updatedOrder,
+    });
+  } catch (error) {
+    console.error('No se pudo emitir evento order:updated:', error);
+  }
 
   return {
     message: 'Estado del pedido actualizado correctamente',
@@ -458,7 +512,6 @@ export async function createPublicOrderService(payload: CreatePublicOrderInput) 
     );
   }
 
-  // IDs únicos para no fallar si el mismo producto se repite
   const productIds = [...new Set(items.map((item) => item.productId))];
 
   const products = await prisma.product.findMany({
@@ -601,17 +654,29 @@ export async function createPublicOrderService(payload: CreatePublicOrderInput) 
     throw new AppError('No se pudo crear el pedido público', 500);
   }
 
-  // Emitimos evento en tiempo real para admin y empleado
-try {
-  const io = getSocket();
+  try {
+    const io = getSocket();
 
-  io.emit('order:created', {
-    message: 'Nuevo pedido recibido',
-    order: createdOrder,
-  });
-} catch (error) {
-  console.error('No se pudo emitir evento order:created:', error);
-}
+    console.log(
+      'Emitiendo evento order:created para pedido:',
+      createdOrder.id,
+      'mesa:',
+      createdOrder.tableNumber
+    );
+
+    io.emit('order:created', {
+      message: 'Nuevo pedido recibido',
+      order: {
+        id: createdOrder.id,
+        tableNumber: createdOrder.tableNumber,
+        status: createdOrder.status,
+        total: createdOrder.total.toString(),
+        createdAt: createdOrder.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error('No se pudo emitir evento order:created:', error);
+  }
 
   return {
     message: 'Pedido realizado correctamente',
