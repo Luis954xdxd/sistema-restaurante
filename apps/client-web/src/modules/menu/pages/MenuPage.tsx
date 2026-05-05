@@ -1,8 +1,9 @@
 // Importamos hooks de React.
 import { useMemo, useState } from 'react';
 
+// Importamos useNavigate para mover al cliente a la pantalla de estado.
 // Importamos useParams para leer la mesa desde la URL.
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 // Importamos header del cliente.
 import ClientHeader from '../../../components/ui/ClientHeader';
@@ -34,6 +35,18 @@ import '../../../components/cart/cart.css';
 // Importamos hook que obtiene productos.
 import { useMenu } from '../../../hooks/useMenu';
 
+// Importamos drawer de pedidos pendientes.
+import PendingOrdersDrawer from '../../order-status/components/PendingOrdersDrawer';
+
+// Importamos funciones para guardar y leer pedidos pendientes.
+import {
+  addPendingOrderId,
+  getPendingOrderIds,
+} from '../../order-status/storage/pendingOrders.storage';
+
+// Importamos estilos de la pantalla de estado y pendientes.
+import '../../order-status/styles/orderStatus.css';
+
 // Importamos tipos.
 import type {
   CreateOrderResponse,
@@ -45,8 +58,14 @@ function MenuPage() {
   // Leemos mesaId desde la URL. Ejemplo: /menu/mesa/7.
   const { mesaId } = useParams();
 
+  // Creamos navigate para cambiar de página desde código.
+  const navigate = useNavigate();
+
   // Estado para abrir o cerrar carrito.
   const [isCartOpen, setIsCartOpen] = useState(false);
+
+  // Estado para abrir o cerrar el panel de pedidos pendientes.
+  const [isPendingDrawerOpen, setIsPendingDrawerOpen] = useState(false);
 
   // Estado de categoría activa.
   const [activeCategoryId, setActiveCategoryId] =
@@ -55,6 +74,16 @@ function MenuPage() {
   // Estado para guardar el pedido exitoso.
   const [successOrder, setSuccessOrder] =
     useState<CreateOrderResponse['order'] | null>(null);
+
+  // Estado con los IDs de pedidos pendientes guardados en este dispositivo.
+  const [pendingOrderIds, setPendingOrderIds] = useState<number[]>(
+    getPendingOrderIds()
+  );
+
+  // Función para refrescar la lista de pendientes desde localStorage.
+  const refreshPendingOrders = () => {
+    setPendingOrderIds(getPendingOrderIds());
+  };
 
   // Traemos productos del backend.
   const { data, isLoading, isError } = useMenu();
@@ -94,7 +123,9 @@ function MenuPage() {
       <ClientHeader
         onOpenCart={() => setIsCartOpen(true)}
         mesaLabel={mesaLabel}
-      />
+        pendingOrdersCount={pendingOrderIds.length}
+        onOpenPendingOrders={() => setIsPendingDrawerOpen(true)}
+        />
 
       <CategoryTabs
         categories={categories}
@@ -119,7 +150,19 @@ function MenuPage() {
       <CartDrawer
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
-        onOrderSuccess={(order) => setSuccessOrder(order)}
+        onOrderSuccess={(order) => {
+          // Guardamos el ID del pedido como pendiente de pago en este dispositivo.
+          addPendingOrderId(order.id);
+
+          // Refrescamos el contador del botón "Pendientes".
+          refreshPendingOrders();
+
+          // Guardamos el pedido exitoso por si después quieres usar el modal.
+          setSuccessOrder(order);
+
+          // Mandamos al cliente directamente a la pantalla de estado del pedido.
+          navigate(`/order-status/${order.id}`);
+        }}
         mesaId={mesaId}
       />
 
@@ -127,6 +170,16 @@ function MenuPage() {
         isOpen={Boolean(successOrder)}
         order={successOrder}
         onClose={() => setSuccessOrder(null)}
+      />
+
+      <PendingOrdersDrawer
+        isOpen={isPendingDrawerOpen}
+        orderIds={pendingOrderIds}
+        onClose={() => setIsPendingDrawerOpen(false)}
+        onPendingOrdersChanged={() => {
+          refreshPendingOrders();
+          setIsPendingDrawerOpen(false);
+        }}
       />
     </div>
   );

@@ -691,3 +691,50 @@ export async function createPublicOrderService(payload: CreatePublicOrderInput) 
     },
   };
 }
+
+// ==============================
+// OBTENER ESTADO PÚBLICO DEL PEDIDO
+// ==============================
+export async function getPublicOrderStatusService(id: number) {
+  if (!Number.isInteger(id) || id <= 0) {
+    throw new AppError('El id del pedido debe ser válido', 400);
+  }
+
+  const order = await prisma.order.findUnique({
+    where: {
+      id,
+    },
+    include: {
+      items: {
+        include: {
+          product: true,
+        },
+      },
+    },
+  });
+
+  if (!order) {
+    throw new AppError('Pedido no encontrado', 404);
+  }
+
+  return {
+    message: 'Estado del pedido obtenido correctamente',
+    order: {
+      id: order.id,
+      status: order.status,
+      tableNumber: order.tableNumber,
+      subtotal: order.subtotal.toString(),
+      tipAmount: order.tipAmount.toString(),
+      total: order.total.toString(),
+      createdAt: order.createdAt,
+      items: order.items.map((item) => ({
+        id: item.id,
+        quantity: item.quantity,
+        product: {
+          id: item.product.id,
+          name: item.product.name,
+        },
+      })),
+    },
+  };
+}

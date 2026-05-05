@@ -1,0 +1,568 @@
+.client-order-status-page {
+  min-height: 100vh;
+  padding: 28px;
+  background:
+    radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 36%),
+    linear-gradient(135deg, #eef6ff, #f8fafc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.client-order-status-card {
+  width: min(900px, 100%);
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(226, 232, 240, 0.96);
+  border-radius: 30px;
+  padding: 28px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.12);
+  backdrop-filter: blur(18px);
+}
+
+.client-order-status-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 22px;
+  align-items: flex-start;
+  margin-bottom: 26px;
+}
+
+.client-order-status-eyebrow {
+  display: inline-flex;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 900;
+  color: #2563eb;
+}
+
+.client-order-status-card h1 {
+  margin: 0 0 8px;
+  font-size: clamp(34px, 7vw, 58px);
+  line-height: 0.95;
+  color: #0f172a;
+}
+
+.client-order-status-card p {
+  margin: 0;
+  color: #64748b;
+  font-size: 16px;
+}
+
+.client-order-status-label {
+  display: inline-flex;
+  padding: 5px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+}
+
+.client-order-status-label.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.client-order-status-label.in_preparation {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.client-order-status-label.ready {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.client-order-status-label.delivered {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.client-order-status-label.cancelled {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.client-order-status-total {
+  min-width: 150px;
+  padding: 18px;
+  border-radius: 22px;
+  background: #0f172a;
+  color: white;
+  text-align: right;
+}
+
+.client-order-status-total span {
+  display: block;
+  color: #cbd5e1;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.client-order-status-total strong {
+  font-size: 26px;
+  font-weight: 900;
+}
+
+.client-order-timeline {
+  display: grid;
+  gap: 16px;
+  margin-top: 24px;
+}
+
+.client-order-step {
+  display: grid;
+  grid-template-columns: 46px 1fr;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px;
+  border-radius: 20px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  opacity: 0.65;
+}
+
+.client-order-step.completed {
+  opacity: 1;
+  background: #eff6ff;
+  border-color: #bfdbfe;
+}
+
+.client-order-step.current {
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.16);
+}
+
+.client-order-step-marker {
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  background: #e2e8f0;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+}
+
+.client-order-step.completed .client-order-step-marker {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+}
+
+.client-order-step h3 {
+  margin: 0 0 4px;
+  color: #0f172a;
+  font-size: 18px;
+}
+
+.client-order-step p {
+  font-size: 14px;
+}
+
+.client-order-status-items {
+  margin-top: 26px;
+  padding-top: 22px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.client-order-status-items h2 {
+  margin: 0 0 14px;
+  color: #0f172a;
+}
+
+.client-order-status-item {
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 10px;
+}
+
+.client-order-cancelled-box {
+  padding: 18px;
+  border-radius: 20px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-weight: 800;
+}
+
+.client-order-status-link {
+  display: inline-flex;
+  margin-top: 22px;
+  text-decoration: none;
+  background: linear-gradient(135deg, #2563eb, #1d4ed8);
+  color: white;
+  padding: 13px 18px;
+  border-radius: 16px;
+  font-weight: 900;
+}
+
+.client-order-status-link.secondary {
+  background: #0f172a;
+}
+
+.client-order-status-toast {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 9999;
+  padding: 15px 18px;
+  border-radius: 18px;
+  background: rgba(15, 23, 42, 0.96);
+  color: white;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.3);
+}
+
+.client-order-status-toast strong {
+  display: block;
+  font-size: 15px;
+}
+
+.client-order-status-toast span {
+  display: block;
+  margin-top: 3px;
+  color: #cbd5e1;
+  font-size: 13px;
+}
+
+@media (max-width: 640px) {
+  .client-order-status-page {
+    padding: 18px;
+    align-items: flex-start;
+  }
+
+  .client-order-status-card {
+    padding: 22px;
+    border-radius: 24px;
+  }
+
+  .client-order-status-header {
+    flex-direction: column;
+  }
+
+  .client-order-status-total {
+    width: 100%;
+    text-align: left;
+  }
+
+  .client-order-status-toast {
+    left: 16px;
+    right: 16px;
+  }
+}
+.client-order-status-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+
+.client-order-pay-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  min-width: 150px;
+  padding: 13px 20px;
+
+  border: none;
+  border-radius: 16px;
+
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: #ffffff;
+
+  font-size: 15px;
+  font-weight: 900;
+
+  cursor: pointer;
+
+  box-shadow: 0 12px 28px rgba(34, 197, 94, 0.28);
+  transition: all 0.2s ease;
+}
+
+.client-order-pay-button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+}
+
+.client-order-pay-button:active {
+  transform: scale(0.98);
+}
+
+.client-order-pay-button:disabled {
+  background: #cbd5e1;
+  color: #64748b;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+  filter: none;
+}
+
+@media (max-width: 640px) {
+  .client-order-status-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .client-order-pay-button,
+  .client-order-status-link.secondary {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.client-pending-floating-button {
+  position: fixed;
+  left: 22px;
+  bottom: 22px;
+  z-index: 900;
+
+  border: none;
+  border-radius: 999px;
+
+  padding: 14px 20px;
+
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: white;
+
+  font-weight: 900;
+  font-size: 15px;
+
+  box-shadow: 0 16px 34px rgba(249, 115, 22, 0.32);
+  cursor: pointer;
+
+  transition: all 0.2s ease;
+}
+
+.client-pending-floating-button:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.05);
+}
+
+.client-pending-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  background: rgba(15, 23, 42, 0.45);
+
+  display: flex;
+  justify-content: flex-start;
+}
+
+.client-pending-drawer {
+  width: min(430px, 100%);
+  height: 100vh;
+  overflow-y: auto;
+
+  background: #ffffff;
+
+  padding: 22px;
+
+  box-shadow: 18px 0 50px rgba(15, 23, 42, 0.25);
+}
+
+.client-pending-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+
+  margin-bottom: 20px;
+}
+
+.client-pending-header h2 {
+  margin: 0 0 6px;
+  color: #0f172a;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.client-pending-header p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.client-pending-header button {
+  border: none;
+  background: #f1f5f9;
+  color: #0f172a;
+
+  width: 38px;
+  height: 38px;
+
+  border-radius: 12px;
+
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.client-pending-empty {
+  padding: 24px;
+  border-radius: 18px;
+
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+
+  color: #64748b;
+  text-align: center;
+  font-weight: 800;
+}
+
+.client-pending-list {
+  display: grid;
+  gap: 16px;
+}
+
+.client-pending-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 22px;
+  padding: 18px;
+
+  background: #ffffff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+}
+
+.client-pending-card-top {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.client-pending-card-top span {
+  display: block;
+  color: #2563eb;
+  font-weight: 900;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.client-pending-card-top h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.client-pending-card-top strong {
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.client-pending-status {
+  display: inline-flex;
+  margin-top: 12px;
+  padding: 7px 11px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.client-pending-status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.client-pending-status.in_preparation {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.client-pending-status.ready {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.client-pending-status.delivered {
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+.client-pending-items {
+  margin-top: 14px;
+  display: grid;
+  gap: 6px;
+}
+
+.client-pending-items p {
+  margin: 0;
+  padding: 9px 11px;
+
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+
+  color: #0f172a;
+  font-weight: 800;
+}
+
+.client-pending-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.client-pending-link,
+.client-pending-pay-button {
+  flex: 1;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 12px 14px;
+  border-radius: 14px;
+
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.client-pending-link {
+  background: #0f172a;
+  color: white;
+}
+
+.client-pending-pay-button {
+  border: none;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  cursor: pointer;
+}
+
+.client-pending-pay-button:disabled {
+  background: #cbd5e1;
+  color: #64748b;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .client-pending-floating-button {
+    left: 16px;
+    bottom: 16px;
+  }
+
+  .client-pending-actions {
+    flex-direction: column;
+  }
+}
+
+.client-pending-realtime-message {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+
+  border-radius: 16px;
+
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+
+  color: #1d4ed8;
+  font-weight: 900;
+  font-size: 14px;
+}
