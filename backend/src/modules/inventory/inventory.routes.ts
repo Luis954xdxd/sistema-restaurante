@@ -1,45 +1,50 @@
+// Importamos Router.
 import { Router } from 'express';
+
+// Importamos controladores.
 import {
-  createInventoryController,
   createInventoryMovementController,
-  getAllInventoryController,
-  getInventoryByProductIdController,
-  getInventoryMovementsByProductIdController,
-  getLowStockProductsController,
-  updateInventoryController,
+  getInventoryMovementsController,
+  getInventoryController,
 } from './inventory.controller';
+
+// Importamos middlewares.
 import { authenticate } from '../../middlewares/auth.middleware';
 import { authorizeRoles } from '../../middlewares/role.middleware';
 
+// Creamos router.
 const router = Router();
 
-router.get('/', authenticate, getAllInventoryController);
-router.get('/low-stock', authenticate, getLowStockProductsController);
-router.get('/:productId', authenticate, getInventoryByProductIdController);
+/**
+ * Obtener inventario.
+ * Lo pueden ver ADMIN y EMPLOYEE.
+ */
 router.get(
-  '/:productId/movements',
-  authenticate,
-  getInventoryMovementsByProductIdController
-);
-
-router.post(
   '/',
   authenticate,
-  authorizeRoles('ADMIN'),
-  createInventoryController
+  authorizeRoles('ADMIN', 'EMPLOYEE'),
+  getInventoryController
 );
 
-router.put(
-  '/:productId',
+/**
+ * Obtener historial de movimientos de inventario.
+ * Lo pueden ver ADMIN y EMPLOYEE.
+ */
+router.get(
+  '/movements',
   authenticate,
-  authorizeRoles('ADMIN'),
-  updateInventoryController
+  authorizeRoles('ADMIN', 'EMPLOYEE'),
+  getInventoryMovementsController
 );
 
+/**
+ * Registrar movimiento de inventario.
+ * Lo pueden hacer ADMIN y EMPLOYEE.
+ */
 router.post(
-  '/movement',
+  '/movements',
   authenticate,
-  authorizeRoles('ADMIN'),
+  authorizeRoles('ADMIN', 'EMPLOYEE'),
   createInventoryMovementController
 );
 

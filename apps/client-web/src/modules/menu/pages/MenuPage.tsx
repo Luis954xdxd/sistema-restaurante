@@ -1,5 +1,8 @@
 // Importamos hooks de React.
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+
+// Importamos iconos para mejorar el diseño.
+import { Flame, Search, Sparkles, Utensils } from 'lucide-react';
 
 // Importamos useNavigate para mover al cliente a la pantalla de estado.
 // Importamos useParams para leer la mesa desde la URL.
@@ -71,6 +74,9 @@ function MenuPage() {
   const [activeCategoryId, setActiveCategoryId] =
     useState<number | null>(null);
 
+  // Estado del buscador.
+  const [searchTerm, setSearchTerm] = useState('');
+
   // Estado para guardar el pedido exitoso.
   const [successOrder, setSuccessOrder] =
     useState<CreateOrderResponse['order'] | null>(null);
@@ -80,10 +86,43 @@ function MenuPage() {
     getPendingOrderIds()
   );
 
+  // Estado para mostrar mini toast cuando se agrega al carrito.
+  const [cartToast, setCartToast] = useState<string | null>(null);
+
   // Función para refrescar la lista de pendientes desde localStorage.
   const refreshPendingOrders = () => {
     setPendingOrderIds(getPendingOrderIds());
   };
+
+  // Escuchamos el evento que manda ProductCard cuando agrega producto.
+  useEffect(() => {
+    const handleCartToast = (event: Event) => {
+      const customEvent = event as CustomEvent<{
+        productName?: string;
+      }>;
+
+      const productName = customEvent.detail?.productName || 'Producto';
+
+      setCartToast(`${productName} agregado al carrito ✅`);
+    };
+
+    window.addEventListener('client:cart-toast', handleCartToast);
+
+    return () => {
+      window.removeEventListener('client:cart-toast', handleCartToast);
+    };
+  }, []);
+
+  // Ocultamos el mini toast después de unos segundos.
+  useEffect(() => {
+    if (!cartToast) return;
+
+    const timeout = setTimeout(() => {
+      setCartToast(null);
+    }, 2600);
+
+    return () => clearTimeout(timeout);
+  }, [cartToast]);
 
   // Traemos productos del backend.
   const { data, isLoading, isError } = useMenu();
@@ -105,47 +144,194 @@ function MenuPage() {
     return Array.from(map.values());
   }, [products]);
 
-  // Filtramos productos por categoría seleccionada.
-  const filteredProducts = useMemo(() => {
-    if (activeCategoryId === null) return products;
+  // Obtenemos nombre de categoría activa.
+  const activeCategoryName = useMemo(() => {
+    if (activeCategoryId === null) return 'Todo el menú';
 
-    return products.filter(
-      (product) => product.category.id === activeCategoryId
+    const foundCategory = categories.find(
+      (category) => category.id === activeCategoryId
     );
-  }, [products, activeCategoryId]);
+
+    return foundCategory?.name || 'Categoría';
+  }, [categories, activeCategoryId]);
+
+  // Filtramos productos por categoría y búsqueda.
+  const filteredProducts = useMemo(() => {
+    const cleanSearch = searchTerm.trim().toLowerCase();
+
+    return products.filter((product) => {
+      const matchesCategory =
+        activeCategoryId === null || product.category.id === activeCategoryId;
+
+      const matchesSearch =
+        cleanSearch.length === 0 ||
+        product.name.toLowerCase().includes(cleanSearch) ||
+        product.description?.toLowerCase().includes(cleanSearch) ||
+        product.category.name.toLowerCase().includes(cleanSearch);
+
+      return matchesCategory && matchesSearch;
+    });
+  }, [products, activeCategoryId, searchTerm]);
+
+  // Productos disponibles.
+  const availableProductsCount = products.filter((product) => {
+    const stock = product.inventory?.stockCurrent ?? 0;
+
+    return product.isAvailable && stock > 0;
+  }).length;
+
+  // Productos con poco stock.
+  const lowStockProductsCount = products.filter((product) => {
+    const stock = product.inventory?.stockCurrent ?? 0;
+
+    return stock > 0 && stock <= 5;
+  }).length;
 
   // Creamos texto de mesa para mostrarlo en pantalla.
   const mesaLabel = mesaId ? `Mesa #${mesaId}` : null;
 
+  // Texto dinámico para el contador de productos.
+  const productsCounterText =
+    filteredProducts.length === 1
+      ? '1 producto encontrado'
+      : `${filteredProducts.length} productos encontrados`;
+
   // Render principal.
   return (
     <div className="client-menu-page">
-      <ClientHeader
-        onOpenCart={() => setIsCartOpen(true)}
-        mesaLabel={mesaLabel}
-        pendingOrdersCount={pendingOrderIds.length}
-        onOpenPendingOrders={() => setIsPendingDrawerOpen(true)}
+      {/* Fondo decorativo con blur */}
+      <div className="client-menu-bg-orb client-menu-bg-orb-1" />
+      <div className="client-menu-bg-orb client-menu-bg-orb-2" />
+      <div className="client-menu-bg-orb client-menu-bg-orb-3" />
+
+      {/* Hero animado del menú */}
+      <div className="client-menu-hero-shell client-menu-super-hero">
+        <div className="client-menu-hero-orb client-menu-hero-orb-1" />
+        <div className="client-menu-hero-orb client-menu-hero-orb-2" />
+        <div className="client-menu-hero-grid" />
+
+        <div className="client-menu-hero-badge">
+          <Sparkles size={16} />
+          Menú interactivo
+        </div>
+
+        <ClientHeader
+          onOpenCart={() => setIsCartOpen(true)}
+          mesaLabel={mesaLabel}
+          pendingOrdersCount={pendingOrderIds.length}
+          onOpenPendingOrders={() => setIsPendingDrawerOpen(true)}
         />
 
-      <CategoryTabs
-        categories={categories}
-        activeCategoryId={activeCategoryId}
-        onSelectCategory={setActiveCategoryId}
-      />
+        <div className="client-menu-hero-extra">
+          <div className="client-menu-hero-extra-card">
+            <Utensils size={20} />
+            <div>
+              <strong>{products.length}</strong>
+              <span>Productos</span>
+            </div>
+          </div>
 
-      {isLoading ? (
-        <EmptyState
-          title="Cargando menú..."
-          description="Estamos preparando los productos."
-        />
-      ) : isError ? (
-        <EmptyState
-          title="Error al cargar"
-          description="Intenta nuevamente."
-        />
-      ) : (
-        <ProductGrid products={filteredProducts} />
+          <div className="client-menu-hero-extra-card">
+            <Sparkles size={20} />
+            <div>
+              <strong>{categories.length}</strong>
+              <span>Categorías</span>
+            </div>
+          </div>
+
+          <div className="client-menu-hero-extra-card">
+            <Flame size={20} />
+            <div>
+              <strong>{availableProductsCount}</strong>
+              <span>Disponibles</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mini toast al agregar al carrito */}
+      {cartToast && (
+        <div className="client-cart-mini-toast">
+          <div className="client-cart-mini-toast-icon">🛒</div>
+
+          <div>
+            <strong>Agregado</strong>
+            <span>{cartToast}</span>
+          </div>
+        </div>
       )}
+
+      {/* Botón flotante para abrir carrito al hacer scroll */}
+      <button
+        type="button"
+        className="client-floating-cart-button"
+        onClick={() => setIsCartOpen(true)}
+      >
+        🛒 Ver carrito
+      </button>
+
+      <div className="client-menu-glass-section client-menu-premium-panel">
+        <div className="client-menu-section-heading">
+          <div>
+            <span>Explora el menú</span>
+            <h2>{activeCategoryName}</h2>
+            <p>{productsCounterText}</p>
+          </div>
+
+          {lowStockProductsCount > 0 && (
+            <div className="client-menu-low-stock-pill">
+              <Flame size={16} />
+              {lowStockProductsCount} con pocas existencias
+            </div>
+          )}
+        </div>
+
+        <div className="client-menu-search-panel">
+          <div className="client-menu-search-box">
+            <Search size={19} />
+
+            <input
+              type="text"
+              value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              placeholder="Buscar tacos, bebidas, hamburguesas..."
+            />
+
+            {searchTerm.trim().length > 0 && (
+              <button type="button" onClick={() => setSearchTerm('')}>
+                Limpiar
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="client-menu-tabs-shell">
+          <CategoryTabs
+            categories={categories}
+            activeCategoryId={activeCategoryId}
+            onSelectCategory={setActiveCategoryId}
+          />
+        </div>
+
+        {isLoading ? (
+          <EmptyState
+            title="Cargando menú..."
+            description="Estamos preparando los productos."
+          />
+        ) : isError ? (
+          <EmptyState
+            title="Error al cargar"
+            description="Intenta nuevamente."
+          />
+        ) : filteredProducts.length === 0 ? (
+          <EmptyState
+            title="Sin resultados"
+            description="No encontramos productos con esa búsqueda o categoría."
+          />
+        ) : (
+          <ProductGrid products={filteredProducts} />
+        )}
+      </div>
 
       <CartDrawer
         isOpen={isCartOpen}

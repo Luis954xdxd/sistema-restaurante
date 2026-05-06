@@ -1,107 +1,20 @@
+// Importamos Prisma para trabajar con la base de datos.
 import prisma from '../../config/prisma';
-import {
-  CreateInventoryInput,
-  CreateInventoryMovementInput,
-  UpdateInventoryInput,
-} from './inventory.types';
-import { buildPaginatedResponse, getPaginationParams } from '../../utils/pagination';
-import { GetInventoryQuery } from './inventory.types';
+
+// Importamos AppError para errores controlados.
 import { AppError } from '../../shared/errors/AppError';
 
-export const createInventoryService = async (input: CreateInventoryInput) => {
-  const { productId, stockCurrent, stockMinimum, unit } = input;
+// Importamos Socket.IO para actualizar pantallas en tiempo real.
+import { getSocket } from '../../socket';
 
-  if (!Number.isInteger(productId) || productId <= 0) {
-    throw new AppError('El productId debe ser un número entero válido', 400);
-  }
+// Importamos tipos.
+import type { CreateInventoryMovementInput } from './inventory.types';
 
-  if (!Number.isInteger(stockCurrent) || stockCurrent < 0) {
-    throw new AppError(
-      'El stock actual debe ser un número entero mayor o igual a 0',
-      400
-    );
-  }
-
-  if (!Number.isInteger(stockMinimum) || stockMinimum < 0) {
-    throw new AppError(
-      'El stock mínimo debe ser un número entero mayor o igual a 0',
-      400
-    );
-  }
-
-  const normalizedUnit = unit.trim();
-
-  if (!normalizedUnit) {
-    throw new AppError('La unidad es obligatoria', 400);
-  }
-
-  const existingProduct = await prisma.product.findUnique({
-    where: {
-      id: productId,
-    },
-    include: {
-      category: true,
-    },
-  });
-
-  if (!existingProduct) {
-    throw new AppError('El producto no existe', 404);
-  }
-
-  if (!existingProduct.isAvailable) {
-    throw new AppError(
-      'No se puede crear inventario para un producto inactivo o no disponible',
-      400
-    );
-  }
-
-  if (!existingProduct.category.isActive) {
-    throw new AppError(
-      'No se puede crear inventario para un producto cuya categoría está inactiva',
-      400
-    );
-  }
-
-  const existingInventory = await prisma.inventory.findUnique({
-    where: {
-      productId,
-    },
-  });
-
-  if (existingInventory) {
-    throw new AppError(
-      'Ese producto ya tiene un registro de inventario',
-      400
-    );
-  }
-
-  const inventory = await prisma.inventory.create({
-    data: {
-      productId,
-      stockCurrent,
-      stockMinimum,
-      unit: normalizedUnit,
-    },
-    include: {
-      product: true,
-    },
-  });
-
-  return {
-    message: 'Inventario creado correctamente',
-    inventory,
-  };
-};
-
-export const getAllInventoryService = async (query: GetInventoryQuery) => {
-  const { search, lowStockOnly, page, limit } = query;
-
-  const { page: currentPage, limit: currentLimit, skip } = getPaginationParams(
-    page,
-    limit
-  );
-
-  const inventoryList = await prisma.inventory.findMany({
+// ==============================
+// OBTENER INVENTARIO
+// ==============================
+export async function getInventoryService() {
+  const inventory = await prisma.inventory.findMany({
     include: {
       product: {
         include: {
@@ -114,226 +27,161 @@ export const getAllInventoryService = async (query: GetInventoryQuery) => {
     },
   });
 
-  let filteredInventory = inventoryList;
-
-  if (search) {
-    const normalizedSearch = search.trim().toLowerCase();
-
-    filteredInventory = filteredInventory.filter((item) =>
-      item.product.name.toLowerCase().includes(normalizedSearch)
-    );
-  }
-
-  if (lowStockOnly) {
-    filteredInventory = filteredInventory.filter(
-      (item) => item.stockCurrent <= item.stockMinimum
-    );
-  }
-
-  const totalItems = filteredInventory.length;
-  const paginatedData = filteredInventory.slice(skip, skip + currentLimit);
-
-  return {
-    message: 'Inventarios obtenidos correctamente',
-    ...buildPaginatedResponse(
-      paginatedData,
-      currentPage,
-      currentLimit,
-      totalItems
-    ),
-  };
-};
-
-export const getInventoryByProductIdService = async (productId: number) => {
-  const inventory = await prisma.inventory.findUnique({
-    where: {
-      productId,
-    },
-    include: {
-      product: {
-        include: {
-          category: true,
-        },
-      },
-    },
-  });
-
-  if (!inventory) {
-    throw new Error('Inventario no encontrado para ese producto');
-  }
-
   return {
     message: 'Inventario obtenido correctamente',
-    inventory,
+    data: inventory,
   };
-};
+}
 
-export const updateInventoryService = async (
-  productId: number,
-  input: UpdateInventoryInput
-) => {
-  const existingInventory = await prisma.inventory.findUnique({
-    where: {
-      productId,
-    },
-  });
-
-  if (!existingInventory) {
-    throw new Error('Inventario no encontrado para ese producto');
-  }
-
-  const dataToUpdate: {
-    stockMinimum?: number;
-    unit?: string;
-  } = {};
-
-  if (input.stockMinimum !== undefined) {
-    if (!Number.isInteger(input.stockMinimum) || input.stockMinimum < 0) {
-      throw new Error('El stock mínimo debe ser un número entero mayor o igual a 0');
-    }
-
-    dataToUpdate.stockMinimum = input.stockMinimum;
-  }
-
-  if (input.unit !== undefined) {
-    const normalizedUnit = input.unit.trim();
-
-    if (!normalizedUnit) {
-      throw new Error('La unidad no puede estar vacía');
-    }
-
-    dataToUpdate.unit = normalizedUnit;
-  }
-
-  const updatedInventory = await prisma.inventory.update({
-    where: {
-      productId,
-    },
-    data: dataToUpdate,
-    include: {
-      product: true,
-    },
-  });
-
-  return {
-    message: 'Inventario actualizado correctamente',
-    inventory: updatedInventory,
-  };
-};
-
-export const createInventoryMovementService = async (
+// ==============================
+// CREAR MOVIMIENTO DE INVENTARIO
+// ==============================
+export async function createInventoryMovementService(
   input: CreateInventoryMovementInput
-) => {
+) {
   const { productId, movementType, quantity, reason } = input;
 
+  // Validamos producto.
   if (!Number.isInteger(productId) || productId <= 0) {
-    throw new AppError('El productId debe ser un número entero válido', 400);
+    throw new AppError('El productId debe ser un número válido', 400);
   }
 
+  // Validamos tipo de movimiento.
+  if (!['ENTRY', 'EXIT', 'ADJUSTMENT'].includes(movementType)) {
+    throw new AppError('Tipo de movimiento inválido', 400);
+  }
+
+  // Validamos cantidad.
   if (!Number.isInteger(quantity) || quantity <= 0) {
     throw new AppError('La cantidad debe ser un número entero mayor a 0', 400);
   }
 
+  // Buscamos el inventario del producto.
   const inventory = await prisma.inventory.findUnique({
     where: {
       productId,
     },
     include: {
-      product: {
-        include: {
-          category: true,
-        },
-      },
+      product: true,
     },
   });
 
   if (!inventory) {
-    throw new AppError('El producto no tiene inventario registrado', 404);
+    throw new AppError('No existe inventario para este producto', 404);
   }
 
-  if (!inventory.product.isAvailable) {
-    throw new AppError(
-      'No se pueden registrar movimientos sobre un producto no disponible',
-      400
-    );
-  }
-
-  if (!inventory.product.category.isActive) {
-    throw new AppError(
-      'No se pueden registrar movimientos sobre un producto cuya categoría está inactiva',
-      400
-    );
-  }
-
+  // Calculamos el nuevo stock.
   let newStock = inventory.stockCurrent;
 
   if (movementType === 'ENTRY') {
-    newStock += quantity;
-  } else if (movementType === 'EXIT') {
+    // Entrada: suma stock.
+    newStock = inventory.stockCurrent + quantity;
+  }
+
+  if (movementType === 'EXIT') {
+    // Salida: resta stock.
     if (inventory.stockCurrent < quantity) {
       throw new AppError(
-        'No hay suficiente stock para realizar la salida',
+        `No hay suficiente stock. Stock actual: ${inventory.stockCurrent}`,
         400
       );
     }
 
-    newStock -= quantity;
-  } else if (movementType === 'ADJUSTMENT') {
+    newStock = inventory.stockCurrent - quantity;
+  }
+
+  if (movementType === 'ADJUSTMENT') {
+    // Ajuste: deja el stock exactamente en la cantidad indicada.
     newStock = quantity;
   }
 
-  const movement = await prisma.inventoryMovement.create({
-    data: {
-      productId,
-      movementType,
-      quantity,
-      reason: reason?.trim() || null,
-    },
-    include: {
-      product: true,
-    },
+  // Guardamos movimiento y actualizamos inventario en una transacción.
+  const result = await prisma.$transaction(async (tx) => {
+    // Actualizamos stock.
+    const updatedInventory = await tx.inventory.update({
+      where: {
+        productId,
+      },
+      data: {
+        stockCurrent: newStock,
+      },
+      include: {
+        product: {
+          include: {
+            category: true,
+          },
+        },
+      },
+    });
+
+    // Guardamos historial de movimiento.
+    const movement = await tx.inventoryMovement.create({
+      data: {
+        productId,
+        movementType,
+        quantity,
+        reason:
+          reason && reason.trim().length > 0
+            ? reason.trim()
+            : getDefaultReason(movementType),
+      },
+    });
+
+    return {
+      updatedInventory,
+      movement,
+    };
   });
 
-  await prisma.inventory.update({
-    where: {
-      productId,
-    },
-    data: {
-      stockCurrent: newStock,
-    },
-  });
+  // Emitimos evento de inventario actualizado.
+  try {
+    const io = getSocket();
+
+    console.log(
+      'Emitiendo evento inventory:updated para producto:',
+      productId
+    );
+
+    io.emit('inventory:updated', {
+      message: 'Inventario actualizado',
+      inventory: result.updatedInventory,
+      movement: result.movement,
+    });
+  } catch (error) {
+    console.error('No se pudo emitir evento inventory:updated:', error);
+  }
 
   return {
     message: 'Movimiento de inventario registrado correctamente',
-    movement,
-    stockCurrent: newStock,
-    lowStockAlert: newStock <= inventory.stockMinimum,
+    inventory: result.updatedInventory,
+    movement: result.movement,
   };
-};
+}
 
-export const getInventoryMovementsByProductIdService = async (
-  productId: number
-) => {
+// ==============================
+// MOTIVO POR DEFECTO
+// ==============================
+function getDefaultReason(movementType: string) {
+  if (movementType === 'ENTRY') {
+    return 'Entrada manual de inventario';
+  }
+
+  if (movementType === 'EXIT') {
+    return 'Salida manual de inventario';
+  }
+
+  if (movementType === 'ADJUSTMENT') {
+    return 'Ajuste manual de inventario';
+  }
+
+  return 'Movimiento manual de inventario';
+}
+
+// ==============================
+// OBTENER HISTORIAL DE MOVIMIENTOS
+// ==============================
+export async function getInventoryMovementsService() {
   const movements = await prisma.inventoryMovement.findMany({
-    where: {
-      productId,
-    },
-    include: {
-      product: true,
-    },
-    orderBy: {
-      createdAt: 'desc',
-    },
-  });
-
-  return {
-    message: 'Movimientos obtenidos correctamente',
-    movements,
-  };
-};
-
-export const getLowStockProductsService = async () => {
-  const inventoryList = await prisma.inventory.findMany({
     include: {
       product: {
         include: {
@@ -342,16 +190,13 @@ export const getLowStockProductsService = async () => {
       },
     },
     orderBy: {
-      stockCurrent: 'asc',
+      id: 'desc',
     },
+    take: 50,
   });
 
-  const lowStockItems = inventoryList.filter(
-    (item) => item.stockCurrent <= item.stockMinimum
-  );
-
   return {
-    message: 'Productos con stock bajo obtenidos correctamente',
-    inventory: lowStockItems,
+    message: 'Historial de inventario obtenido correctamente',
+    data: movements,
   };
-};
+}

@@ -1,25 +1,10 @@
-export interface CreateInventoryInput {
-  productId: number;
-  stockCurrent: number;
-  stockMinimum: number;
-  unit: string;
-}
+// Tipos permitidos para movimientos de inventario.
+export type InventoryMovementType = 'ENTRY' | 'EXIT' | 'ADJUSTMENT';
 
-export interface UpdateInventoryInput {
-  stockMinimum?: number;
-  unit?: string;
-}
-
+// Payload para crear un movimiento de inventario.
 export interface CreateInventoryMovementInput {
   productId: number;
-  movementType: 'ENTRY' | 'EXIT' | 'ADJUSTMENT';
+  movementType: InventoryMovementType;
   quantity: number;
   reason?: string;
-}
-
-export interface GetInventoryQuery {
-  search?: string;
-  lowStockOnly?: boolean;
-  page?: number;
-  limit?: number;
 }

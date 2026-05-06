@@ -25,6 +25,46 @@ import type {
 import { getSocket } from '../../socket';
 
 // ==============================
+// EMITIR EVENTO DE INVENTARIO
+// ==============================
+// Esta función nos ayuda a avisar en tiempo real cuando cambia el stock.
+// Sirve para que el panel de inventario se actualice sin refrescar.
+function emitInventoryUpdated(payload: {
+  message: string;
+  inventory: unknown;
+  movement?: unknown;
+}) {
+  try {
+    const io = getSocket();
+
+    console.log('Emitiendo evento inventory:updated');
+
+    io.emit('inventory:updated', payload);
+  } catch (error) {
+    console.error('No se pudo emitir evento inventory:updated:', error);
+  }
+}
+
+// ==============================
+// EMITIR EVENTO DE PEDIDO ACTUALIZADO
+// ==============================
+// Esta función avisa a cocina, mesero, cliente y admin cuando cambia un pedido.
+function emitOrderUpdated(order: unknown) {
+  try {
+    const io = getSocket();
+
+    console.log('Emitiendo evento order:updated');
+
+    io.emit('order:updated', {
+      message: 'Pedido actualizado',
+      order,
+    });
+  } catch (error) {
+    console.error('No se pudo emitir evento order:updated:', error);
+  }
+}
+
+// ==============================
 // CREAR PEDIDO INTERNO
 // ==============================
 export const createOrderService = async (input: CreateOrderInput) => {
@@ -178,22 +218,35 @@ export const createOrderService = async (input: CreateOrderInput) => {
         );
       }
 
-      await tx.inventory.update({
+      const updatedInventory = await tx.inventory.update({
         where: {
           productId: item.productId,
         },
         data: {
           stockCurrent: currentInventory.stockCurrent - item.quantity,
         },
+        include: {
+          product: {
+            include: {
+              category: true,
+            },
+          },
+        },
       });
 
-      await tx.inventoryMovement.create({
+      const movement = await tx.inventoryMovement.create({
         data: {
           productId: item.productId,
           movementType: 'EXIT',
           quantity: item.quantity,
           reason: `Descuento automático por pedido #${createdOrder.id}`,
         },
+      });
+
+      emitInventoryUpdated({
+        message: 'Inventario actualizado por pedido interno',
+        inventory: updatedInventory,
+        movement,
       });
     }
 
@@ -388,22 +441,35 @@ export const updateOrderStatusService = async (
           );
         }
 
-        await tx.inventory.update({
+        const updatedInventory = await tx.inventory.update({
           where: {
             productId: item.productId,
           },
           data: {
             stockCurrent: inventory.stockCurrent + item.quantity,
           },
+          include: {
+            product: {
+              include: {
+                category: true,
+              },
+            },
+          },
         });
 
-        await tx.inventoryMovement.create({
+        const movement = await tx.inventoryMovement.create({
           data: {
             productId: item.productId,
             movementType: 'ENTRY',
             quantity: item.quantity,
             reason: `Devolución automática por cancelación del pedido #${existingOrder.id}`,
           },
+        });
+
+        emitInventoryUpdated({
+          message: 'Inventario restaurado por cancelación de pedido',
+          inventory: updatedInventory,
+          movement,
         });
       }
 
@@ -431,21 +497,7 @@ export const updateOrderStatusService = async (
       });
     });
 
-    try {
-      const io = getSocket();
-
-      console.log(
-        'Emitiendo evento order:updated para pedido:',
-        updatedOrder?.id
-      );
-
-      io.emit('order:updated', {
-        message: 'Pedido actualizado',
-        order: updatedOrder,
-      });
-    } catch (error) {
-      console.error('No se pudo emitir evento order:updated:', error);
-    }
+    emitOrderUpdated(updatedOrder);
 
     return {
       message: 'Pedido cancelado correctamente y stock restaurado',
@@ -470,18 +522,7 @@ export const updateOrderStatusService = async (
     },
   });
 
-  try {
-    const io = getSocket();
-
-    console.log('Emitiendo evento order:updated para pedido:', updatedOrder.id);
-
-    io.emit('order:updated', {
-      message: 'Pedido actualizado',
-      order: updatedOrder,
-    });
-  } catch (error) {
-    console.error('No se pudo emitir evento order:updated:', error);
-  }
+  emitOrderUpdated(updatedOrder);
 
   return {
     message: 'Estado del pedido actualizado correctamente',
@@ -616,22 +657,35 @@ export async function createPublicOrderService(payload: CreatePublicOrderInput) 
         );
       }
 
-      await tx.inventory.update({
+      const updatedInventory = await tx.inventory.update({
         where: {
           productId: item.productId,
         },
         data: {
           stockCurrent: currentInventory.stockCurrent - item.quantity,
         },
+        include: {
+          product: {
+            include: {
+              category: true,
+            },
+          },
+        },
       });
 
-      await tx.inventoryMovement.create({
+      const movement = await tx.inventoryMovement.create({
         data: {
           productId: item.productId,
           movementType: 'EXIT',
           quantity: item.quantity,
           reason: `Descuento automático por pedido público #${newOrder.id}`,
         },
+      });
+
+      emitInventoryUpdated({
+        message: 'Inventario actualizado por pedido público',
+        inventory: updatedInventory,
+        movement,
       });
     }
 
